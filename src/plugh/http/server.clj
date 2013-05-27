@@ -43,16 +43,16 @@
 ;; FIXME move to another place
 (defmacro match-func [& body]
   "Create a function that does pattern matching."
-  `(fn [~'xxq1234_dont_use] (match [~'xxq1234_dont_use] ~@body)))
+  `(fn [x#] (match [x#] ~@body)))
 
 ;; FIXME move to another place
 (defmacro match-pfunc [& body]
   "Create a partial function that does pattern matching."
   (let [rewrite (mapcat (fn [x] [(first x) true]) (partition 2 body))]
-  `(fn ([~'xq1234_dont_use] (match [~'xq1234_dont_use] ~@body))
-       ([~'xq1234_dont_use ~'yxq1234_dont_use]
+  `(fn ([x#] (match [x#] ~@body))
+       ([x# y#]
          (cond
-           (= :defined? ~'xq1234_dont_use)
-           (match [~'yxq1234_dont_use] ~@rewrite)
-           (= :body ~'xq1234_dont_use)
+           (= :defined? x#)
+           (match [y#] ~@rewrite)
+           (= :body x#)
            '(~@body))))))
