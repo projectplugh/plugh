@@ -51,7 +51,8 @@
   (let [rewrite (mapcat (fn [x] [(first x) true]) (partition 2 body))]
   `(fn ([~'xq1234_dont_use] (match [~'xq1234_dont_use] ~@body))
        ([~'xq1234_dont_use ~'yxq1234_dont_use]
-         (if (= :defined? ~'xq1234_dont_use)
-                  (match [~'yxq1234_dont_use] ~@rewrite)
-                  '(~@body)
-                  )))))
+         (cond
+           (= :defined? ~'xq1234_dont_use)
+           (match [~'yxq1234_dont_use] ~@rewrite)
+           (= :body ~'xq1234_dont_use)
+           '(~@body))))))
