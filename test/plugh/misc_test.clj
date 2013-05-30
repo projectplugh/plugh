@@ -103,7 +103,7 @@
     (let [t (. Thread currentThread)
           a (promise)
           b (promise)
-          fut (bfuture (. Thread sleep 300) 44)]
+          fut (pfuture (. Thread sleep 300) 44)]
       (on-done fut (fn [x]
                      (deliver a x)
                      (is (not (= t (. Thread currentThread))))
@@ -121,7 +121,7 @@
     (let [t (. Thread currentThread)
           a (promise)
           b (promise)
-          fut (bfuture (. Thread sleep 300) (/ 0 0))]
+          fut (pfuture (. Thread sleep 300) (/ 0 0))]
       (on-fail fut (fn [x]
                      (deliver a x)
                      (is (not (= t (. Thread currentThread))))

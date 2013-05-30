@@ -48,7 +48,10 @@
     (reset! (:fail (meta fut)) [])
     ))
 
-(defmacro bfuture [& body]
+(defmacro pfuture [& body]
+  "Build a Future that allows for registration of on-done and on-fail
+  events so that one does not have to sit around on a thread waiting
+  for the future"
   `(let [prom# (promise)
           fut#
          (with-meta
@@ -66,11 +69,19 @@
      fut#))
 
 (defn on-done [fut func]
+  "Call with a Future created via pfuture and a function.
+   When the pfuture is done and the result was not throwing
+   an exception, invoke the function. If the pfuture was
+   complete before this call, invoke the function immediately"
   (if @(:complete (meta fut))
     (func @fut)
     (swap! (:done (meta fut)) (fn [x] (cons func x)))))
 
 (defn on-fail [fut func]
+  "Call with a Future created via pfuture and a function.
+   When the pfuture is done and the result was throwing
+   an exception, invoke the function with the exception. If the pfuture was
+   complete before this call, invoke the function immediately"
   (if @(:complete (meta fut))
     (func @(:fail-exception (meta fut)))
     (swap! (:fail (meta fut)) (fn [x] (cons func x)))))
