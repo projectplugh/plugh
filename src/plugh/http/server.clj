@@ -1,6 +1,6 @@
 (ns plugh.http.server
   (:gen-class)
-  (:use aleph.http lamina.core [clojure.core.match :only (match)])
+  (:use aleph.http lamina.core plugh.util.misc)
   )
 
 (defn url-decode [string]
@@ -40,19 +40,3 @@
   (println "Yep"))
 
 
-;; FIXME move to another place
-(defmacro match-func [& body]
-  "Create a function that does pattern matching."
-  `(fn [x#] (match [x#] ~@body)))
-
-;; FIXME move to another place
-(defmacro match-pfunc [& body]
-  "Create a partial function that does pattern matching."
-  (let [rewrite (mapcat (fn [x] [(first x) true]) (partition 2 body))]
-  `(fn ([x#] (match [x#] ~@body))
-       ([x# y#]
-         (cond
-           (= :defined? x#)
-           (match [y#] ~@rewrite)
-           (= :body x#)
-           '(~@body))))))
