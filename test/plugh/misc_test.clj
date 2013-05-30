@@ -115,3 +115,21 @@
                      ))
       (is (= @fut @b))
       )))
+
+(deftest future-test-exception
+  (testing "Futures & exeptions"
+    (let [t (. Thread currentThread)
+          a (promise)
+          b (promise)
+          fut (bfuture (. Thread sleep 300) (/ 0 0))]
+      (on-fail fut (fn [x]
+                     (deliver a x)
+                     (is (not (= t (. Thread currentThread))))
+                     ))
+      (is (instance? Exception @a))
+      (on-fail fut (fn [x]
+                     (deliver b x)
+                     (is (= t (. Thread currentThread)))
+                     ))
+      (is (instance? Exception @b))
+      )))

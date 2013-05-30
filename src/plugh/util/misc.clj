@@ -42,6 +42,7 @@
 
 (defn fail-done [fut val]
   (let [funcs (map (fn [func] (future (func val))) @(:fail (meta fut)))]
+    (reset! (:fail-exception (meta fut)) val)
     (reset! (:complete (meta fut)) true)
     (dorun funcs) ;; force evaluation
     (reset! (:fail (meta fut)) [])
@@ -56,9 +57,10 @@
                (let [ret# (do ~@body)]
                  (all-done @prom# ret#)
                  ret#)
-               (catch Exception e# (fail-done e# @prom#))))
+               (catch Exception e# (fail-done @prom# e#))))
            {:complete (atom false)
             :done (atom [])
+            :fail-exception (atom nil)
             :fail (atom [])})]
      (deliver prom# fut#)
      fut#))
@@ -70,5 +72,5 @@
 
 (defn on-fail [fut func]
   (if @(:complete (meta fut))
-    (func @fut)
+    (func @(:fail-exception (meta fut)))
     (swap! (:fail (meta fut)) (fn [x] (cons func x)))))
