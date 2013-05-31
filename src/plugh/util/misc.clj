@@ -34,19 +34,21 @@
              )))))
 
 (defn all-done [fut val]
+  (locking fut
   (let [funcs (map (fn [func] (future (func val))) @(:done (meta fut)))]
     (reset! (:complete (meta fut)) true)
     (dorun funcs) ;; force evaluation
     (reset! (:done (meta fut)) [])
-    ))
+    )))
 
 (defn fail-done [fut val]
+  (locking fut
   (let [funcs (map (fn [func] (future (func val))) @(:fail (meta fut)))]
     (reset! (:fail-exception (meta fut)) val)
     (reset! (:complete (meta fut)) true)
     (dorun funcs) ;; force evaluation
     (reset! (:fail (meta fut)) [])
-    ))
+    )))
 
 (defmacro pfuture [& body]
   "Build a Future that allows for registration of on-done and on-fail
@@ -73,15 +75,26 @@
    When the pfuture is done and the result was not throwing
    an exception, invoke the function. If the pfuture was
    complete before this call, invoke the function immediately"
-  (if @(:complete (meta fut))
-    (func @fut)
-    (swap! (:done (meta fut)) (fn [x] (cons func x)))))
+  (let [todo (locking fut
+               (if @(:complete (meta fut))
+                 (fn [] (func @fut))
+                 (do
+                   (swap! (:done (meta fut)) (fn [x] (cons func x)))
+                   (fn [] nil)
+                   )
+                 ))]
+    (todo)))
 
 (defn on-fail [fut func]
   "Call with a Future created via pfuture and a function.
    When the pfuture is done and the result was throwing
    an exception, invoke the function with the exception. If the pfuture was
    complete before this call, invoke the function immediately"
-  (if @(:complete (meta fut))
-    (func @(:fail-exception (meta fut)))
-    (swap! (:fail (meta fut)) (fn [x] (cons func x)))))
+  (let [todo (locking fut
+               (if @(:complete (meta fut))
+                 (fn [] (func @(:fail-exception (meta fut))))
+                 (do
+                   (swap! (:fail (meta fut)) (fn [x] (cons func x)))
+                   (fn [] nil)
+                   )))]
+    (todo)))
