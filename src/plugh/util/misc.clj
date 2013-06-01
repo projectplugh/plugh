@@ -98,3 +98,8 @@
                    (fn [] nil)
                    )))]
     (todo)))
+
+
+(defn deref? [it]
+  "Is it something that deref can be called on?"
+  (instance? clojure.lang.IDeref it))

@@ -133,3 +133,9 @@
                      ))
       (is (instance? Exception @b))
       )))
+
+(deftest deref-test
+  (testing "Does deref? work?"
+    (is (deref? (promise)))
+    (is (not (deref? "foo")))
+    ))
