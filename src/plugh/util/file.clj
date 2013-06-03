@@ -30,6 +30,18 @@
               (recur (. is read ba))
             )))))))
 
+(defn map-file-lines [file-desc the-func]
+  "Apply a function to every line in the file"
+  (io!
+    (doall
+      (with-open [r (reader file-desc)]
+        (loop [line (.readLine r)
+               ret []]
+          (if (not line)
+            ret
+            (recur (.readLine r) (conj ret (the-func line)))))))
+  ))
+
 (defn file-to-string [the-file]
   "read a file as a UTF-8 encoded string"
   (new String (file-to-bytes the-file) "UTF-8"))

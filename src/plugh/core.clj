@@ -1,5 +1,6 @@
 (ns plugh.core
-  (:use plugh.http.server)
+  (:use plugh.http.server
+        plugh.util.file)
   (:require [clojurewerkz.welle.core    :as wc]
             [clojurewerkz.welle.buckets :as wb]
             [clojurewerkz.welle.kv      :as kv])
@@ -17,6 +18,7 @@
   "I don't do a whole lot ... yet."
   [& args]
   (println "dog")
+  (println "It's "(map-file-lines (first args) #(.length %)))
  ;; (wc/connect!)
 ;;  (wb/create "thing")
   ;; (run-server 8080)
