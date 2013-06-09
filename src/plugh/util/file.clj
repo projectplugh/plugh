@@ -28,7 +28,7 @@
             (do
               (if (> len 0) (. os write ba 0 len))
               (recur (. is read ba))
-            )))))))
+              )))))))
 
 (defn map-file-lines [file-desc the-func]
   "Apply a function to every line in the file"
@@ -40,7 +40,7 @@
           (if (not line)
             ret
             (recur (.readLine r) (conj ret (the-func line)))))))
-  ))
+    ))
 
 (defn file-to-string [the-file]
   "read a file as a UTF-8 encoded string"

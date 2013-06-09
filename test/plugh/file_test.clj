@@ -15,5 +15,6 @@
   (is
     (>
       (. (file-to-string "./lein")
-        lastIndexOf "TRAMP")
+         lastIndexOf "TRAMP")
       5000)))
+

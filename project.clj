@@ -4,9 +4,13 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [com.novemberain/welle "1.5.0"]
+                 [com.novemberain/welle "1.5.0" :exclude [org.apache.httpcomponents/httpclient]]
+                 [joda-time/joda-time "2.2"]
                  [aleph "0.3.0-rc1"]
                  [org.clojure/core.match "0.2.0-alpha12"]
+                 [org.clojure/clojurescript "0.0-1806"]
+                 [com.google.javascript/closure-compiler "r1592"]
+                 [org.clojure/google-closure-library "0.0-790"]
+                 [org.apache.httpcomponents/httpclient "4.2.5"]
                  ]
-
   :main plugh.core)

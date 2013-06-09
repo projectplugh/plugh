@@ -1,5 +1,4 @@
 (ns plugh.util.misc
-  (:gen-class)
   (:use [clojure.core.match :only (match)])
   )
 
@@ -12,11 +11,11 @@
   (let [rewrite (mapcat (fn [x] [(first x) true]) (partition 2 body))]
     `(fn ([x#] (match [x#] ~@body))
        ([x# y#]
-         (cond
-           (= :defined? x#)
-           (match [y#] ~@rewrite)
-           (= :body x#)
-           '(~@body))))))
+        (cond
+          (= :defined? x#)
+          (match [y#] ~@rewrite)
+          (= :body x#)
+          '(~@body))))))
 
 (defn or-else
   [it & rest]
@@ -24,38 +23,38 @@
   (let [all (cons it rest)]
     (fn ([x] (let [func (first (filter (fn [ff]
                                          (ff :defined? x)) all))]
-              (if func
-                (func x)
-                (it x))))
+               (if func
+                 (func x)
+                 (it x))))
       ([x y] (let [func (first (filter (fn [ff] (ff :defined? y)) all))]
-             (cond
-               (= :defined? x) (if func true false)
-               (= :body x) (reduce concat (map (fn [thing] (thing :body nil)) all)))
-             )))))
+               (cond
+                 (= :defined? x) (if func true false)
+                 (= :body x) (reduce concat (map (fn [thing] (thing :body nil)) all)))
+               )))))
 
 (defn all-done [fut val]
   (locking fut
-  (let [funcs (map (fn [func] (future (func val))) @(:done (meta fut)))]
-    (reset! (:complete (meta fut)) true)
-    (dorun funcs) ;; force evaluation
-    (reset! (:done (meta fut)) [])
-    )))
+    (let [funcs (map (fn [func] (future (func val))) @(:done (meta fut)))]
+      (reset! (:complete (meta fut)) true)
+      (dorun funcs) ;; force evaluation
+      (reset! (:done (meta fut)) [])
+      )))
 
 (defn fail-done [fut val]
   (locking fut
-  (let [funcs (map (fn [func] (future (func val))) @(:fail (meta fut)))]
-    (reset! (:fail-exception (meta fut)) val)
-    (reset! (:complete (meta fut)) true)
-    (dorun funcs) ;; force evaluation
-    (reset! (:fail (meta fut)) [])
-    )))
+    (let [funcs (map (fn [func] (future (func val))) @(:fail (meta fut)))]
+      (reset! (:fail-exception (meta fut)) val)
+      (reset! (:complete (meta fut)) true)
+      (dorun funcs) ;; force evaluation
+      (reset! (:fail (meta fut)) [])
+      )))
 
 (defmacro pfuture [& body]
   "Build a Future that allows for registration of on-done and on-fail
   events so that one does not have to sit around on a thread waiting
   for the future"
   `(let [prom# (promise)
-          fut#
+         fut#
          (with-meta
            (future
              (try
@@ -72,9 +71,9 @@
 
 (defn on-done [fut func]
   "Call with a Future created via pfuture and a function.
-   When the pfuture is done and the result was not throwing
-   an exception, invoke the function. If the pfuture was
-   complete before this call, invoke the function immediately"
+  When the pfuture is done and the result was not throwing
+  an exception, invoke the function. If the pfuture was
+  complete before this call, invoke the function immediately"
   (let [todo (locking fut
                (if @(:complete (meta fut))
                  (fn [] (func @fut))
@@ -87,9 +86,9 @@
 
 (defn on-fail [fut func]
   "Call with a Future created via pfuture and a function.
-   When the pfuture is done and the result was throwing
-   an exception, invoke the function with the exception. If the pfuture was
-   complete before this call, invoke the function immediately"
+  When the pfuture is done and the result was throwing
+  an exception, invoke the function with the exception. If the pfuture was
+  complete before this call, invoke the function immediately"
   (let [todo (locking fut
                (if @(:complete (meta fut))
                  (fn [] (func @(:fail-exception (meta fut))))
@@ -103,3 +102,14 @@
 (defn deref? [it]
   "Is it something that deref can be called on?"
   (instance? clojure.lang.IDeref it))
+
+(defmacro print-time [& body]
+  "Executes the code and prints the milliseconds for run time"
+  `(let [start# (. java.lang.System currentTimeMillis)]
+     (try (do ~@body)
+       (finally (println "Execution time " (- (. java.lang.System currentTimeMillis) start#)))
+     )))
+
+(defn id [x]
+  "The identity function"
+   x)
