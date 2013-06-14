@@ -1,7 +1,11 @@
 (ns plugh.util.js-compiler
-  (:require [cljs.compiler :as comp])
+  (:require [cljs.compiler :as comp]
+            [cljs.analyzer :as ana]
+            [cljs.closure :as sure])
   (:import [java.io PushbackReader BufferedReader StringReader]
-           [clojure.lang ISeq])
+           [clojure.lang ISeq]
+           [javax.script ScriptEngineManager]
+           )
   )
 
 ; Copyright (c) 2012 Fogus and Relevance Inc. All rights reserved.  The
@@ -20,8 +24,34 @@
 ; agreeing to be bound by the terms of this license.  You must not
 ; remove this notice, or any other, from this software.
 
-(ns himera.server.setup)
 
+(defn thing []
+  (println (sure/build '[(ns hello.core)
+                    (defn ^{:export greet} greet [n] (str "Hola " n))
+                    (defn ^:export sum [xs] 42)
+                    
+                    (def dog "moo")
+                    
+                    (defn sloth [& p] (println "Hi" p))
+                    
+                    (+ 1 1)
+                    
+                    (defn ee [r] (re-seq
+                                   #"(?i)7" r))
+                    
+                    (def x {})
+                    
+                    (def y (conj x {:baz 77}))
+                    
+                    (def z (conj y {:foo 99}))
+                    
+                    
+                    
+                    ]
+                  {:optimizations :none :pretty-print true})
+  ))
+
+(comment
 (def ^:private core-names
   '{re-pattern {:name cljs.core.re-pattern},
     keyword? {:name cljs.core.keyword?},
@@ -271,21 +301,21 @@
 
 (defn build [action locals expr opt pp]
   {:result
-   (binding [comp/*cljs-ns* 'cljs.user]
-     (let [env {:ns (@comp/namespaces comp/*cljs-ns*)
+   (binding [ana/*cljs-ns* 'cljs.user]
+     (let [env {:ns (@ana/namespaces ana/*cljs-ns*)
                 :uses #{'cljs.core}
                 :context :expr
                 :locals locals}]
-       (with-redefs [comp/get-expander exp]
+       (with-redefs [ana/get-expander exp]
          (action env expr))))
    :status 200})
 
 (def compilation (partial build
-                          #(comp/emits (comp/analyze % %2))
-                          (setup/load-core-names)))
+                          #(comp/emits (ana/analyze % %2))
+                          (load-core-names)))
 
 (def analyze (partial build
-                      #(comp/analyze % %2)
+                      #(ana/analyze % %2)
                       {}))
 
 
@@ -307,5 +337,10 @@
               (.findInternedVar ^clojure.lang.Namespace (find-ns 'cljs.core) sym))))]
     (println [sym mvar])
     (let [sym (symbol (.getName sym))]
-      (when (and mvar (or (setup/clojure-macros sym) (setup/cljs-macros sym)))
+      (when (and mvar (or (clojure-macros sym) (cljs-macros sym)))
         @mvar))))
+
+(defn forg [] (compilation {} "(hi)" {})
+  )
+
+)

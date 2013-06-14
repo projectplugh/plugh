@@ -1,6 +1,7 @@
 (ns plugh.core
   (:use plugh.http.server
         plugh.util.file
+        plugh.util.js-compiler
         plugh.util.misc)
   (:require [clojurewerkz.welle.core    :as wc]
             [clojurewerkz.welle.buckets :as wb]
