@@ -5,7 +5,8 @@
         plugh.util.misc)
   (:require [clojurewerkz.welle.core    :as wc]
             [clojurewerkz.welle.buckets :as wb]
-            [clojurewerkz.welle.kv      :as kv])
+            [clojurewerkz.welle.kv      :as kv]
+            [plugh.util.js-compiler :as jsc])
   (:import [com.basho.riak.client.http.util Constants]
            [org.joda.time.format DateTimeFormat]
            )
@@ -65,7 +66,8 @@
   (println "ox")
   ;; (run-server 8080)
   ;(dorun (map #(put-in-riak (str "k" %) (str "hi dude " %) %) (repeatedly 10000 (fn [] (rand-int 19299999)))))
-  (dorun (load-for "seventhings"))
+  ;(dorun (load-for "seventhings"))
+  (jsc/thing)
   ;;(println "Answer " (count (sort (into () (kv/index-query "thing" :sage [1 200000000])))))
   (println "Hello, World!"))
 
