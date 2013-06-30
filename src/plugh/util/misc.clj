@@ -13,7 +13,7 @@
        ([x# y#]
         (cond
           (= :defined? x#)
-          (match [y#] ~@rewrite)
+          (match [y#] ~@rewrite :else false)
           (= :body x#)
           '(~@body))))))
 

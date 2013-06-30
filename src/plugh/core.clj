@@ -2,7 +2,8 @@
   (:use plugh.http.server
         plugh.util.file
         plugh.util.js-compiler
-        plugh.util.misc)
+        plugh.util.misc
+        clojure.core.async)
   (:require [clojurewerkz.welle.core    :as wc]
             [clojurewerkz.welle.buckets :as wb]
             [clojurewerkz.welle.kv      :as kv]
@@ -71,6 +72,34 @@
   ;;(println "Answer " (count (sort (into () (kv/index-query "thing" :sage [1 200000000])))))
   (println "Hello, World!"))
 
+(defn t2 []
+  (let [c (chan)]
+    (go
+      (loop [v 0]
+        (let [val (<! c)] 
+          (if (not val) 
+            (println "exit with v " v) 
+            (do 
+              (print (str "val " val " v " v "\n"))
+              (recur (inc v)))))))
+    
+    (go
+      (loop [v 0]
+        (let [val (<! c)] 
+          (if (not val) 
+            (println "exit 2 with v " v) 
+            (do 
+              (print (str "2: val " val " v " v "\n"))
+              (recur (inc v)))))))
+    
+    
+    (dotimes [i 50] (>!! c (str "hi " i)))
+    (dotimes [i 50] (>!! c (str "hi again " i)))
+    
+    (close! c)
+
+    )
+  "dine")
 
 (defn thingy [] 
   (let [name "/home/dpp/logs/seventhings/logs/2013_05_24.request.log"
