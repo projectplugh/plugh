@@ -1,5 +1,5 @@
 (ns plugh.core
-  (:use plugh.http.server
+  (:use 
         plugh.util.file
         plugh.util.js-compiler
         plugh.util.misc
@@ -72,6 +72,15 @@
   ;;(println "Answer " (count (sort (into () (kv/index-query "thing" :sage [1 200000000])))))
   (println "Hello, World!"))
 
+(defn t3 []
+  (loop [x 1]
+    (cond
+      (< x 5) (recur (inc x))
+      (< x 20) (recur (+ 88 x))
+      :else x
+      ))
+  )
+
 (defn t2 []
   (let [c (chan)]
     (go
@@ -103,7 +112,7 @@
 
 (defn thingy [] 
   (let [name "/home/dpp/logs/seventhings/logs/2013_05_24.request.log"
-        str (first (map-file-lines name id))]
+        str (first (map-file-lines name identity))]
     (date-from-line str)
     (let [it (map-file-lines name (fn [x] [x (date-from-line x)]))]
       [(count it) (first it)])))

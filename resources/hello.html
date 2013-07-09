@@ -1,0 +1,28 @@
+<!DOCTYPE html >
+<html>
+<head><title>hi I'm index
+</title>
+<script type="text/javascript" src="/dog.js"></script>
+</head>
+<body>
+	hello
+	<canvas id="sloth" width="1000px" height="400px"></canvas>
+	<script>
+	var canvas = document.getElementById("sloth");
+	var ctx = canvas.getContext("2d");
+	ctx.fillStyle = "rgb(200,0,0)";
+	ctx.fillRect (10, 10, 55, 50);
+		// ctx.translate(0, 400);
+	ctx.transform(0, -1, 1, 0, 0, 400);
+	ctx.beginPath();
+	ctx.strokeStyle = "rgb(200,0,0)";
+	ctx.moveTo(0,0);
+	for (var x = 1; x < 300; x++) {
+		ctx.lineTo(x, x);
+	}
+	ctx.stroke();
+	ctx.endPath();
+
+	</script>
+</body>
+</html>

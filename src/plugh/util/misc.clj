@@ -2,6 +2,12 @@
   (:use [clojure.core.match :only (match)])
   )
 
+(defn millis 
+  "The current time: milliseconds since epoc"
+  []
+  (. java.lang.System currentTimeMillis)
+  )
+
 (defmacro match-func [& body]
   "Create a function that does pattern matching."
   `(fn [x#] (match [x#] ~@body)))
@@ -32,6 +38,7 @@
                  (= :body x) (reduce concat (map (fn [thing] (thing :body nil)) all)))
                )))))
 
+(comment 
 (defn all-done [fut val]
   (locking fut
     (let [funcs (map (fn [func] (future (func val))) @(:done (meta fut)))]
@@ -97,19 +104,18 @@
                    (fn [] nil)
                    )))]
     (todo)))
+)
 
+(defmacro --> 
+  "Kinda like threading, but with nil testing"
+  ([x] x)
+  ([x func] 
+   `(if (not (nil? ~x)) (apply ~func [~x])))
+  ([x func & rest]
+   `(--> (--> ~x ~func) ~@rest))
+  )
 
 (defn deref? [it]
   "Is it something that deref can be called on?"
   (instance? clojure.lang.IDeref it))
 
-(defmacro print-time [& body]
-  "Executes the code and prints the milliseconds for run time"
-  `(let [start# (. java.lang.System currentTimeMillis)]
-     (try (do ~@body)
-       (finally (println "Execution time " (- (. java.lang.System currentTimeMillis) start#)))
-     )))
-
-(defn id [x]
-  "The identity function"
-   x)

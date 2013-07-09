@@ -44,4 +44,5 @@
 
 (defn file-to-string [the-file]
   "read a file as a UTF-8 encoded string"
-  (new String (file-to-bytes the-file) "UTF-8"))
+  (if (and the-file (. the-file exists) (. the-file isFile))
+    (new String (file-to-bytes the-file) "UTF-8")))
