@@ -1,0 +1,37 @@
+<!doctype html>
+<html ng-app>
+<head>
+	<title>Hi</title>
+	<script type="text/javascript" src="/js/angular.js"></script>
+</head>
+<body>
+	index.html <b>dude</b>
+
+	<input ng-model="name">
+	<p>Hello {{name}}!</p>
+
+	<div ng-init="list = ['Chrome', 'Safari', 'Firefox', 'IE'] "> <input ng-model="list" ng-list> <br>
+<input ng-model="list" ng-list> <br> <pre>list={{list}}</pre> <br>
+<ol>
+<li ng-repeat="item in list">
+{{item}} </li>
+</ol> </div>
+
+	<canvas id="sloth" width="1000px" height="400px"></canvas>
+	<script>
+	var canvas = document.getElementById("sloth");
+	var ctx = canvas.getContext("2d");
+	ctx.fillStyle = "rgb(200,0,0)";
+	ctx.fillRect (10, 10, 55, 50);
+		// ctx.translate(0, 400);
+	ctx.transform(0, -1, 1, 0, 0, 400);
+	ctx.beginPath();
+	ctx.strokeStyle = "rgb(200,0,0)";
+	ctx.moveTo(0,0);
+	for (var x = 1; x < 300; x++) {
+		ctx.lineTo(x, x);
+	}
+	ctx.stroke();
+	</script>
+</body>
+</html>
