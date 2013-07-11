@@ -11,6 +11,7 @@
                  [org.clojure/clojurescript "0.0-1820"]
                  [com.google.javascript/closure-compiler "r1592"]
                  [org.clojure/google-closure-library "0.0-790"]
+                 [org.clojure/core.logic "0.8.3"]
                  [org.apache.httpcomponents/httpclient "4.2.5"]
                  ]
   ; :jvm-opts ["-Xmx512M"]
