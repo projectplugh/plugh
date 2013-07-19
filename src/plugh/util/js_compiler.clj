@@ -72,7 +72,17 @@
                            [(== 8 q)])))
                   ;;       (membero q '(:cat :dog :bird :bat :debra))))
         
-        (greet (str "it is " (moof)))
+        ;; (greet (str "it is " (moof)))
+        
+        (defn ^{:export runit} run-it [a1 b1 c1]
+            (clj->js
+              (let [a (js->clj a1)
+                  b (js->clj b1)
+                  c (js->clj c1)]
+                
+                (mapcat #(if (or (= nil %) (js/isNaN %)) [] [%]) [(. js/Date parse "Jqewqwewqeun 19, 2013 00:00:00 +0000")])
+              ))
+          )
         
         ]
       ;;{:optimizations :advanced :pretty-print true}
@@ -95,7 +105,15 @@
 
 
 (defn that []
-  (println "js sez " (execute-in-context (str (thing))))
+  (println "js sez " (execute-in-context (str (thing) 
+  "
+  var q = function (a, b, c) {
+  return runit(a,b,c);
+  };
+  
+  JSON.stringify(q(true, {a: 'a', b: true, c: 45}, [1, 2, true, 'moose']))
+  
+  ")))
    ;; "\ngreet({a: 33, b: 'hi'});")))
   (println "hi"))
 
