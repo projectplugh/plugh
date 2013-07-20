@@ -80,12 +80,13 @@
                   b (js->clj b1)
                   c (js->clj c1)]
                 
-                (mapcat #(if (or (= nil %) (js/isNaN %)) [] [%]) [(. js/Date parse "Jqewqwewqeun 19, 2013 00:00:00 +0000")])
+                ;; (mapcat #(if (or (= nil %) (js/isNaN %)) [] [%]) [(. js/Date parse "Jqewqwewqeun 19, 2013 00:00:00 +0000")])
+                [1]
               ))
           )
         
         ]
-      ;;{:optimizations :advanced :pretty-print true}
+      ;; {:optimizations :advanced :pretty-print true}
       {:optimizations :simple :pretty-print true}
       )]
       
@@ -105,16 +106,5 @@
 
 
 (defn that []
-  (println "js sez " (execute-in-context (str (thing) 
-  "
-  var q = function (a, b, c) {
-  return runit(a,b,c);
-  };
-  
-  JSON.stringify(q(true, {a: 'a', b: true, c: 45}, [1, 2, true, 'moose']))
-  
-  ")))
-   ;; "\ngreet({a: 33, b: 'hi'});")))
-  (println "hi"))
-
-
+  (let [src (str "function (__p1, __p2, __p3) {" (thing) "\n\n return runit(__p1, __p2, __p3);}")]
+    (println "js sez " (execute-in-context (str src "(1)")))))

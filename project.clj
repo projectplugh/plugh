@@ -7,7 +7,7 @@
                  [com.novemberain/welle "1.5.0" :exclude [org.apache.httpcomponents/httpclient]]
                  [joda-time/joda-time "2.2"]
                  [aleph "0.3.0-rc1"]
-                 [org.clojure/core.match "0.2.0-rc3"]
+                 [org.clojure/core.match "0.2.0-rc4"]
                  [enlive "1.1.1"]
                  [org.clojure/core.logic "0.8.3"]
                  [org.clojure/core.async "0.1.0-SNAPSHOT"]

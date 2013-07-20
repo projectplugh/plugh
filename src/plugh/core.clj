@@ -1,12 +1,12 @@
 (ns plugh.core
   (:use 
         plugh.util.file
-        plugh.util.js-compiler
         plugh.util.misc
         clojure.core.async)
   (:require [clojurewerkz.welle.core    :as wc]
             [clojurewerkz.welle.buckets :as wb]
             [clojurewerkz.welle.kv      :as kv]
+            [clojurewerkz.welle.mr      :as mr]
             [plugh.util.js-compiler :as jsc])
   (:import [com.basho.riak.client.http.util Constants]
            [org.joda.time.format DateTimeFormat]
@@ -33,7 +33,7 @@
 (defn load-for [service] 
   (wc/connect!)
   (wb/create service)
-  (let [root (str "/home/dpp/logs/" service)]
+  (let [root (str "/home/dpp/storage/logs/" service)]
     (map-file root 
               (fn [file] 
                 (cond 
@@ -56,6 +56,27 @@
                   )))
   ))
 
+(defn mr-job [service]
+  (let [src "function (a, b, c) {return [1];}"] ;; (str "\n\n function(__p1, __p2, __p3) {\n\n" (jsc/thing) "\n\nreturn runit(__p1, __p2, __p3);}\n\n")]
+    (mr/map-reduce 
+      {:inputs service,
+       :timeout 9000000,
+       :query 
+       [{:map {:language "javascript"
+               :source src}}
+        {:reduce {:language "javascript"
+                  :source "function (red) {
+                          var sum = 0;
+                          for (var x = 0; x < red.length; x++) {
+                          sum = sum + red[x];
+                          }
+                          
+                          return [sum];
+                          
+                          }"
+}}
+        ]})))
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
@@ -67,8 +88,9 @@
   (println "ox")
   ;; (run-server 8080)
   ;(dorun (map #(put-in-riak (str "k" %) (str "hi dude " %) %) (repeatedly 10000 (fn [] (rand-int 19299999)))))
-  ;(dorun (load-for "seventhings"))
-  (jsc/thing)
+  ; (dorun (load-for "seventhings"))
+  ; (jsc/thing)
+  (println "The result of the MR job is " (mr-job "seventhings"))
   ;;(println "Answer " (count (sort (into () (kv/index-query "thing" :sage [1 200000000])))))
   (println "Hello, World!"))
 
