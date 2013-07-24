@@ -2,7 +2,7 @@
 <html>
 <head><title>hi I'm index
 </title>
-<script type="text/javascript" src="/dog.js"></script>
+<!-- <script type="text/javascript" src="/dog.js"></script> -->
 </head>
 <body>
 	hello
@@ -23,6 +23,15 @@
 	ctx.stroke();
 	ctx.endPath();
 
+	</script>
+
+	<script type="text/javascript">
+	try {
+		// Create our websocket object with the address to the websocket
+		var ws = new WebSocket((location.protocol == 'https:' ? 'wss:' : 'ws:') + "//" + location.host + "/socket/");
+	} catch (e) {
+		console.log(JSON.stringify(e));
+	}
 	</script>
 </body>
 </html>

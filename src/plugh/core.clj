@@ -7,7 +7,8 @@
             [clojurewerkz.welle.buckets :as wb]
             [clojurewerkz.welle.kv      :as kv]
             [clojurewerkz.welle.mr      :as mr]
-            [plugh.util.js-compiler :as jsc])
+            [plugh.util.js-compiler :as jsc]
+            [plugh.http.server :as ps])
   (:import [com.basho.riak.client.http.util Constants]
            [org.joda.time.format DateTimeFormat]
            )
