@@ -3,7 +3,7 @@
   (:use plugh.util.file
         clojure.core.async)
   (:require 
-    [plugh.util.misc :as pmisc]
+    [plugh.util.misc :as pm]
     [clojure.java.io :as io]
     [org.httpkit.server :as hs]
     ))
@@ -34,7 +34,7 @@
   []
   
   {
-   :last-seen (atom pmisc/millis), ;; the last time the request was seen
+   :last-seen (atom pm/millis), ;; the last time the request was seen
    :request-count (atom 0), ;; the current number of open http requests
    :function-map (atom {}), ;; map GUID strings to functions that will be called when the map
    :handler-channels (atom []) ;; each handler will have a channel... send a message to shut down the handler, if possible
@@ -71,7 +71,7 @@
   [x]
   (cond
     (string? x) (let [lasti (. x lastIndexOf ".")]
-                  (pmisc/--> (if (neg? lasti) x (. x substring (inc lasti)))
+                  (pm/--> (if (neg? lasti) x (. x substring (inc lasti)))
                        #(. % toLowerCase)
                        #(get suffixs % "text/plain")))
     (coll? x) (suffixy-thing (last x))
@@ -103,7 +103,7 @@
      identity
      (map 
        (fn [path]
-         (pmisc/--> path
+         (pm/--> (into ["static"] path)
               ;; joiner
               #(clojure.string/join "/" %)
               io/resource 
@@ -119,7 +119,7 @@
         identity
         (map
           (fn [path]
-            (pmisc/--> path
+            (pm/--> (into ["static"] path)
                  ;; joiner
                  #(clojure.string/join "/" %)
                  io/resource
@@ -147,12 +147,12 @@
            url-decode
            (drop 1 (. path split "/"))))
    ind-path
-   (pmisc/--> raw-path
+   (pm/--> raw-path
         #(if (empty? %) ["index"] %)
         (fn [q] (into [] (map #(if (zero? (count %)) "index" %) q)))
         )
    [end-body end-suffix]
-   (pmisc/--> (last ind-path)
+   (pm/--> (last ind-path)
         #(. % split "\\.")
         #(if (> (count %) 1) [(clojure.string/join "." (butlast %)) (last %)] [(first %) ""]))]
   {:raw-path raw-path
@@ -189,7 +189,7 @@
     ))
 
 (def stuff1 
-  (pmisc/match-pfunc
+  (pm/match-pfunc
     [{:path [(:or "cat" "sloth") & rest]
       :query q}]
     {:status 200
@@ -197,14 +197,23 @@
      :body (str "cat: " rest " query " q)}))
 
 (def stuff2
-  (pmisc/match-pfunc
+  (pm/match-pfunc
     [{:path [(:or "moose" "sloth") & rest]
       :query q}]
     {:status 200
      :headers {"content-type" "text/html"}
      :body (str "moose: " rest " query " q)}))
 
-(def stuff (pmisc/or-else stuff1 stuff2 check-file))
+(def start-app
+  (pm/match-pfunc
+    [{:path ["plugh" "boot"]
+      :suffix "js"
+      :query q}]
+    {:status 200
+     :headers {"content-type" "application/javascript"}
+     :body "console.log('hi');"}))
+
+(def stuff (pm/or-else start-app stuff1 stuff2 check-file))
 
 (defn req-handler [_request]
   (hs/with-channel 
@@ -216,7 +225,7 @@
         (if (stuff :defined? request)
           (loop [res (stuff request)]
             (cond
-              (pmisc/deref? res) (hs/send! channel @res)
+              (pm/deref? res) (hs/send! channel @res)
               (chan? res) 
               (let [tmo (timeout 5000)
                     [c v] (alts! [res tmo])]
