@@ -54,3 +54,13 @@
       (map :done)
       (remove #{"yes"})
       count)))
+
+
+(def.controller m Wombat [$scope]
+  
+  
+  (assoc! $scope :wombat (atom (map atom [1 2 3 19 98 4 5])))
+  
+  (defn.scope indexes [x] (range 0 (count x)))
+  
+  (defn.scope dude [x] (str "Hello " x)))

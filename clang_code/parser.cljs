@@ -111,6 +111,7 @@
 ;
 ; get the value, assoc it and set the result
 (defn set-value [text [a ks]]
+  (.log js/console (str "sv " text " a " a " ks " ks))
   ; Find the top context the value is present in, but if not found, then assign
   ; the new var into the current context.
   (letfn [(find-context* [getter context]
@@ -206,5 +207,5 @@
 
 (def clang (module "clang"))
 
-(def.provider clang $parse (AssignableParseProvider.))
+;; (def.provider clang $parse (AssignableParseProvider.))
 (def.provider clang $readParse (ReadParseProvider.))

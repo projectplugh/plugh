@@ -12,43 +12,73 @@
 	<p>Hello {{name}}!</p>
 
 	<div ng-init="list = ['Chrome', 'Safari', 'Firefox', 'IE'] "> <input ng-model="list" ng-list> <br>
-<input ng-model="list" ng-list> <br> <pre>list={{list}}</pre> <br>
-<ol>
-<li ng-repeat="item in list">
-{{item}} </li>
-</ol>
+		<input ng-model="list" ng-list> <br> <pre>list={{list}}</pre> <br>
+		<ol>
+			<li ng-repeat="item in list">
+				{{item}}
+			</li>
+		</ol>
+	</div>
 
-<div ng-controller="TodoCtrl">
-	<div>{{(map :text todos)}}</div>
-      <h2>Function composition within template expressions</h2>
-      <table>
-        <tr clang-repeat="x in  @nums">
-          <!-- <td clang-repeat="x in (map (juxt identity odd?) group)"> -->
-          <td>
-            {{x}}: <!-- {{(first x)}} + 1 = --> {{(+ 1 x)}} = {{(+ 33 x)}}. <!-- {{(first x)}} is {{(if (last x) "odd" "even")}} -->
-          </td> 
-        </tr>
-      </table>
+	<div ng-controller="TodoCtrl">
+		<div>{{(map :text todos)}}</div>
+		<h2>Function composition within template expressions</h2>
+		<table>
+			<tr clang-repeat="x in  @nums">
+				<!-- <td clang-repeat="x in (map (juxt identity odd?) group)"> -->
+				<td>
+					{{x}}: <!-- {{(first x)}} + 1 = --> {{(+ 1 x)}} = {{(+ 33 x)}}. <!-- {{(first x)}} is {{(if (last x) "odd" "even")}} -->
+				</td> 
+			</tr>
+		</table>
 
-    <table>
-        <tr clang-repeat="group in (drop 1 (partition 3 @nums))">
-          <td clang-repeat="x in (map (juxt identity odd?) group)">
-            {{x}}: {{(first x)}} + 1 = {{(addone x)}} = {{(addone x)}}. {{(first x)}} is {{(if (last x) "odd" "even")}}
-          </td>
-        </tr>
-      </table>
+		<table>
+			<tr clang-repeat="group in (drop 1 (partition 3 @nums))">
+				<td clang-repeat="x in (map (juxt identity odd?) group)">
+					{{x}}: {{(first x)}} + 1 = {{(addone x)}} = {{(addone x)}}. {{(first x)}} is {{(if (last x) "odd" "even")}}
+				</td>
+			</tr>
+		</table>
 
+<!--
+		<div>
+			Meow: {{@meow}}
+			<input ng-model="@meow">
+			<input ng-model="@meow">
+			<input ng-model="@meow">
+			<input ng-model="@meow">
+			Meow: {{@meow}}
+		</div>
+-->
+	</div>
 
-      <div>
-      	Meow: {{@meow}}
-      	<input ng-model="@meow">
-      	<input ng-model="@meow">
-      	<input ng-model="@meow">
-      	<input ng-model="@meow">
-      	Meow: {{@meow}}
-      </div>
+	<h2>here's stuff</h2>
 
-    </div>
+<script type="text/javascript">
+function Wombat2($scope) {
+	$scope.wombat = [1, 2, 3, 4, 98, 44, 12];
+
+	$scope.indexes = function(thing) {
+		console.log("In indexes for "+JSON.stringify(thing));
+		var ret = [];
+
+		for (var x = 0; x < thing.length; x++) ret.push(x);
+
+		return ret;
+	}
+}
+</script>
+
+	<div ng-controller="Wombat2">
+
+		<div ng-repeat="n in wombat">
+			<div>{{n}}</div>
+		</div>
+
+		<div ng-repeat="n in wombat">
+			<div>Input {{n}}: <input ng-model="wombat[$index]"></div>
+		</div>
+	</div>
 
 
 <!-- </div>

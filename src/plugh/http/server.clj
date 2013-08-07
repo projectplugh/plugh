@@ -213,10 +213,11 @@
 (def stuff (pm/or-else start-app stuff1 stuff2 check-file))
 
 (defn ping-channel [ch]
+  (comment
   (future 
     (Thread/sleep 1000)
     (hs/send! ch {:status 200 :body "Hi"})
-    (ping-channel ch)))
+    (ping-channel ch))))
 
 (defn req-handler [_request]
   (hs/with-channel 
