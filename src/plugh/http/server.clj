@@ -71,9 +71,9 @@
   [x]
   (cond
     (string? x) (let [lasti (. x lastIndexOf ".")]
-                  (pm/--> (if (neg? lasti) x (. x substring (inc lasti)))
-                       #(. % toLowerCase)
-                       #(get suffixs % "text/plain")))
+                  (some-> (if (neg? lasti) x (. x substring (inc lasti)))
+                       (#(. % toLowerCase))
+                       (#(get suffixs % "text/plain"))))
     (coll? x) (suffixy-thing (last x))
     :else "text/plain"
     ))
@@ -94,6 +94,15 @@
            (map #(conj (butlast path) (str (last path) "." %)) ["html" "htm"])))
        ])))
 
+(defn- build-path [path]
+  (let [looker (fn [base] (some-> (into [base] path)
+              ;; joiner
+              (#(clojure.string/join "/" %))
+              io/resource
+              io/file
+              (#(if (and (. % exists) (. % isFile)) %))))]
+    (first (filter identity (map looker '("static" "target"))))))
+
 (defn check-file 
   "Checks to see if the request can be
   returned as a file in the resource directory"
@@ -103,28 +112,16 @@
      identity
      (map 
        (fn [path]
-         (pm/--> (into ["static"] path)
-              ;; joiner
-              #(clojure.string/join "/" %)
-              io/resource 
-              io/file
-              #(if (and (. % exists) (. % isFile)) %)
+         (some-> (build-path path)
               file-to-string
-              #(to-response % path))) 
+              (#(to-response % path))))
        (build-possible req)))))
  ([q req]
   (if (= q :defined?)
     (first 
       (filter
         identity
-        (map
-          (fn [path]
-            (pm/--> (into ["static"] path)
-                 ;; joiner
-                 #(clojure.string/join "/" %)
-                 io/resource
-                 io/file
-                 #(and (. % exists) (. % isFile)))) 
+        (map build-path
           (build-possible req)))))))
 
 (defn path-split [path]
@@ -147,14 +144,14 @@
            url-decode
            (drop 1 (. path split "/"))))
    ind-path
-   (pm/--> raw-path
-        #(if (empty? %) ["index"] %)
-        (fn [q] (into [] (map #(if (zero? (count %)) "index" %) q)))
+   (some-> raw-path
+        (#(if (empty? %) ["index"] %))
+        ((fn [q] (into [] (map #(if (zero? (count %)) "index" %) q))))
         )
    [end-body end-suffix]
-   (pm/--> (last ind-path)
-        #(. % split "\\.")
-        #(if (> (count %) 1) [(clojure.string/join "." (butlast %)) (last %)] [(first %) ""]))]
+   (some-> (last ind-path)
+        (#(. % split "\\."))
+        (#(if (> (count %) 1) [(clojure.string/join "." (butlast %)) (last %)] [(first %) ""])))]
   {:raw-path raw-path
    :ind-path ind-path
    :path (conj (into [] (butlast ind-path)) end-body)
@@ -215,12 +212,18 @@
 
 (def stuff (pm/or-else start-app stuff1 stuff2 check-file))
 
+(defn ping-channel [ch]
+  (future 
+    (Thread/sleep 1000)
+    (hs/send! ch {:status 200 :body "Hi"})
+    (ping-channel ch)))
+
 (defn req-handler [_request]
   (hs/with-channel 
     _request
     channel 
     (let [request (fix_req _request)]
-      (if (hs/websocket? channel) (println (str "Got request " request)))
+      (if (hs/websocket? channel)  (do (println (str "Got request " request)) (ping-channel channel)))
       (go
         (if (stuff :defined? request)
           (loop [res (stuff request)]

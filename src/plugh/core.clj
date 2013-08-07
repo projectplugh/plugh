@@ -1,20 +1,19 @@
 (ns plugh.core
   (:use 
-        plugh.util.file
-        plugh.util.misc
-        clojure.core.async)
-  (:require [clojurewerkz.welle.core    :as wc]
-            [clojurewerkz.welle.buckets :as wb]
-            [clojurewerkz.welle.kv      :as kv]
-            [clojurewerkz.welle.mr      :as mr]
-            [plugh.util.js-compiler :as jsc]
-            [plugh.http.server :as ps])
-  (:import [com.basho.riak.client.http.util Constants]
-           [org.joda.time.format DateTimeFormat]
-           )
+    plugh.util.file
+    plugh.util.misc
+   
+    
+    clojure.core.async)
+  (:require 
+    [plugh.util.js-compiler :as jsc]
+    [plugh.http.server :as ps]
+    [ plugh.html.parser :as wonky1]
+    [plugh.http.javascript :as wonky2])
   (:gen-class )
   )
 
+(comment 
 (defn put-in-riak [key it n]
   (io!
     (println "Storing " key " value " it " n " n " clz " (.getClass (long n)))
@@ -30,7 +29,7 @@
         ]
     millis
     ))
-    
+
 (defn load-for [service] 
   (wc/connect!)
   (wb/create service)
@@ -55,7 +54,7 @@
                           )
                         )))
                   )))
-  ))
+    ))
 
 (defn mr-job [service]
   (let [src "function (a, b, c) {return [1];}"] ;; (str "\n\n function(__p1, __p2, __p3) {\n\n" (jsc/thing) "\n\nreturn runit(__p1, __p2, __p3);}\n\n")]
@@ -76,7 +75,7 @@
                           
                           }"
 }}
-        ]})))
+        ]}))))
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -91,7 +90,7 @@
   ;(dorun (map #(put-in-riak (str "k" %) (str "hi dude " %) %) (repeatedly 10000 (fn [] (rand-int 19299999)))))
   ; (dorun (load-for "seventhings"))
   ; (jsc/thing)
-  (println "The result of the MR job is " (mr-job "seventhings"))
+  ; (println "The result of the MR job is " (mr-job "seventhings"))
   ;;(println "Answer " (count (sort (into () (kv/index-query "thing" :sage [1 200000000])))))
   (println "Hello, World!"))
 
@@ -129,10 +128,10 @@
     (dotimes [i 50] (>!! c (str "hi again " i)))
     
     (close! c)
-
+    
     )
   "dine")
-
+(comment 
 (defn thingy [] 
   (let [name "/home/dpp/logs/seventhings/logs/2013_05_24.request.log"
         str (first (map-file-lines name identity))]
@@ -141,3 +140,4 @@
       [(count it) (first it)])))
 
 (defn meow [] "woof")
+)

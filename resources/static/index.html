@@ -1,9 +1,9 @@
 <!doctype html>
-<html ng-app>
+<html ng-app="clang.todo">
 <head>
 	<title>Hi</title>
 	<script type="text/javascript" src="/js/angular.js"></script>
-	<script type="text/javascript" src="/plugh/boot.js?app=one&app=two"></script>
+	<script type="text/javascript" src="/js/clang_dbg.js"></script>
 </head>
 <body>
 	index.html <b>dude</b>
@@ -17,6 +17,38 @@
 <li ng-repeat="item in list">
 {{item}} </li>
 </ol>
+
+<div ng-controller="TodoCtrl">
+	<div>{{(map :text todos)}}</div>
+      <h2>Function composition within template expressions</h2>
+      <table>
+        <tr clang-repeat="x in  @nums">
+          <!-- <td clang-repeat="x in (map (juxt identity odd?) group)"> -->
+          <td>
+            {{x}}: <!-- {{(first x)}} + 1 = --> {{(+ 1 x)}} = {{(+ 33 x)}}. <!-- {{(first x)}} is {{(if (last x) "odd" "even")}} -->
+          </td> 
+        </tr>
+      </table>
+
+    <table>
+        <tr clang-repeat="group in (drop 1 (partition 3 @nums))">
+          <td clang-repeat="x in (map (juxt identity odd?) group)">
+            {{x}}: {{(first x)}} + 1 = {{(addone x)}} = {{(addone x)}}. {{(first x)}} is {{(if (last x) "odd" "even")}}
+          </td>
+        </tr>
+      </table>
+
+
+      <div>
+      	Meow: {{@meow}}
+      	<input ng-model="@meow">
+      	<input ng-model="@meow">
+      	<input ng-model="@meow">
+      	<input ng-model="@meow">
+      	Meow: {{@meow}}
+      </div>
+
+    </div>
 
 
 <!-- </div>

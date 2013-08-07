@@ -1,14 +1,14 @@
 (ns plugh.util.js-compiler
-  (:require [cljs.closure :as whole])
+  (:require [cljs.closure :as whole]
+            [cljs.compiler :as comp]
+            [cljs.analyzer :as ana]
+            [cljs.source-map :as sm])
   (:import [java.io PushbackReader BufferedReader StringReader]
            [clojure.lang ISeq]
            [javax.script ScriptEngineManager]
-           [org.mozilla.javascript Scriptable]
-           [org.mozilla.javascript UniqueTag]
-           [org.mozilla.javascript Context]
+           
            )
   )
-
 
 (defn thing []
     (let [x (whole/build 
@@ -94,6 +94,7 @@
       x
     ))
 
+(comment 
 (defn execute-in-context 
   "Execute a string in a context"
   [string]
@@ -104,7 +105,7 @@
     (. context evaluateString scope, string "Lift"  0 nil) 
     (finally (. Context exit)))))
 
-
 (defn that []
   (let [src (str "function (__p1, __p2, __p3) {" (thing) "\n\n return runit(__p1, __p2, __p3);}")]
     (println "js sez " (execute-in-context (str src "(1)")))))
+)
