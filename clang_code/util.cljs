@@ -1,6 +1,11 @@
 (ns clang.util
   (:refer-clojure :exclude [assoc!]))
 
+;; Copyright © 2013 Darrick Wiebe
+
+;; Distributed under the Eclipse Public License, the same as Clojure.
+
+
 (defn ?
   ([x] (if (coll? x)
          (.log js/console (str x) x)

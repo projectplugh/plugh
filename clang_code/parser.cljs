@@ -5,6 +5,10 @@
   (:require-macros
     [clang.angular :refer [fnj def.provider fn-symbol-map ??]]))
 
+;; Copyright © 2013 Darrick Wiebe
+
+;; Distributed under the Eclipse Public License, the same as Clojure.
+
 (def ng-parse (.get (.injector js/angular (array "ng")) "$parse"))
 
 (letfn

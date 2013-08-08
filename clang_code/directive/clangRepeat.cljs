@@ -3,6 +3,10 @@
   (:require clang.directive.interpolate)
   (:use [clang.util :only [? ! module]]))
 
+;; Copyright © 2013 Darrick Wiebe
+
+;; Distributed under the Eclipse Public License, the same as Clojure.
+
 (def m (module "clang"))
 
 (defn kv-seq [collection]

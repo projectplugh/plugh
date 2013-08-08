@@ -4,6 +4,10 @@
   (:require [clojure.string :as cs])
   (:use [clang.util :only [? ! module]]))
 
+;; Copyright © 2013 Darrick Wiebe
+
+;; Distributed under the Eclipse Public License, the same as Clojure.
+
 (def start "{{")
 (def end "}}")
 (def re-start #"\{\{")

@@ -1,5 +1,9 @@
 (ns clang.angular)
 
+;; Copyright © 2013 Darrick Wiebe
+
+;; Distributed under the Eclipse Public License, the same as Clojure.
+
 ; Function with dependancy injection metadata for angular
 (defmacro fnj [args & body]
   (if (empty? args)

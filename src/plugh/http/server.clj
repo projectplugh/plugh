@@ -213,6 +213,8 @@
 (def stuff (pm/or-else start-app stuff1 stuff2 check-file))
 
 (defn ping-channel [ch]
+  (hs/on-close ch (fn [status] (println "Channel " ch " closed")))
+  (hs/on-receive ch (fn [data] ))
   (comment
   (future 
     (Thread/sleep 1000)

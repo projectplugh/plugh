@@ -24,10 +24,9 @@
 		<div>{{(map :text todos)}}</div>
 		<h2>Function composition within template expressions</h2>
 		<table>
-			<tr clang-repeat="x in  @nums">
-				<!-- <td clang-repeat="x in (map (juxt identity odd?) group)"> -->
-				<td>
-					{{x}}: <!-- {{(first x)}} + 1 = --> {{(+ 1 x)}} = {{(+ 33 x)}}. <!-- {{(first x)}} is {{(if (last x) "odd" "even")}} -->
+			<tr clang-repeat="group in (drop 1 (partition 3 @nums))">
+				<td clang-repeat="x in (map (juxt identity odd?) group)">
+					{{x}}
 				</td> 
 			</tr>
 		</table>
@@ -40,46 +39,30 @@
 			</tr>
 		</table>
 
-<!--
-		<div>
-			Meow: {{@meow}}
-			<input ng-model="@meow">
-			<input ng-model="@meow">
-			<input ng-model="@meow">
-			<input ng-model="@meow">
-			Meow: {{@meow}}
-		</div>
--->
+		<table>
+			<tr clang-repeat="group in (drop 1 (partition 3 @nums))">
+				<td clang-repeat="x in (map (juxt identity odd?) group)">
+					{{x}}: {{(first x)}} + 1 = {{(addone x)}} = {{(addone x)}}. {{(first x)}} is {{(if (last x) "odd" "even")}}
+				</td>
+			</tr>
+		</table>
+
 	</div>
 
 	<h2>here's stuff</h2>
 
-<script type="text/javascript">
-function Wombat2($scope) {
-	$scope.wombat = [1, 2, 3, 4, 98, 44, 12];
-
-	$scope.indexes = function(thing) {
-		console.log("In indexes for "+JSON.stringify(thing));
-		var ret = [];
-
-		for (var x = 0; x < thing.length; x++) ret.push(x);
-
-		return ret;
-	}
-}
-</script>
-
-	<div ng-controller="Wombat2">
+	<div ng-controller="Wombat">
+		<input ng-model="thing"> <button ng-click="dothing()">Thing</button>
 
 		<div ng-repeat="n in wombat">
-			<div>{{n}}</div>
+			<div>{{(dude n)}}</div>
 		</div>
 
-		<div ng-repeat="n in wombat">
-			<div>Input {{n}}: <input ng-model="wombat[$index]"></div>
-		</div>
+		<input ng-model="wombat" ng-list>
+
+		<hr>
+
 	</div>
-
 
 <!-- </div>
 
