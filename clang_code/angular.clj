@@ -38,6 +38,9 @@
 (defmacro def.provider [module n value]
   `(.provider ~module ~(name n) ~value))
 
+(defmacro in-scope [& body]
+  `(.$apply ~'$scope (fn [] ~@body)))
+
 (defmacro def.fn [module n args & body]
   `(.value ~module ~(name n) (fn ~args ~@body)))
 

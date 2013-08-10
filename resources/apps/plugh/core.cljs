@@ -11,7 +11,7 @@
             [cljs.core.async :as async
              :refer [<! >! chan close! sliding-buffer put! alts!]]))
 
-(def m (module "clang.todo" ["clang"]))
+(def m (module "plugh.app" ["clang"]))
 
 (def base (atom (+ 1000000000000000 (long (rand 1000000000000000)))))
 

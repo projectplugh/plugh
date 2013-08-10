@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app="clang.todo">
+<html ng-app="plugh.app">
 <head>
 	<title>Hi</title>
 	<script type="text/javascript" src="/js/angular.js"></script>
@@ -62,6 +62,16 @@
 
 		<hr>
 
+	</div>
+
+	<h2>Chat</h2>
+
+	<div ng-controller="Chatter">
+		<ul>
+			<li ng-repeat="n in chats">{{n}}</li>
+		</ul>
+
+		<input ng-model="line"><button ng-click="send()">Send</button>
 	</div>
 
 <!-- </div>
