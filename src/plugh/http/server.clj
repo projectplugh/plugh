@@ -6,6 +6,7 @@
     [plugh.util.misc :as pm]
     [clojure.java.io :as io]
     [org.httpkit.server :as hs]
+    [clojure.edn :as edn]
     ))
 
 
@@ -15,6 +16,8 @@
   Apply the function and the server will shut down."
   (atom nil))
 
+
+(def ^:dynamic *websocket* nil)
 
 (def ^:dynamic *request* nil)
 (def ^:dynamic *addl-headers* (atom {}))
@@ -212,21 +215,83 @@
 
 (def stuff (pm/or-else start-app stuff1 stuff2 check-file))
 
+(declare find-chan-for-guid)
+(declare find-guid-for-chan)
+
+(defmethod print-method clojure.core.async.impl.channels.ManyToManyChannel [chan, ^java.io.Writer w]
+   (let [guid (find-guid-for-chan chan)]
+  (.write w "#guid-chan\"")
+  (.write w guid)
+  (.write w "\"")))
+
 (defn ping-channel [ch]
   (hs/on-close ch (fn [status] (println "Channel " ch " closed")))
-  (hs/on-receive ch (fn [data] ))
-  (comment
-  (future 
-    (Thread/sleep 1000)
-    (hs/send! ch {:status 200 :body "Hi"})
-    (ping-channel ch))))
+  (hs/on-receive ch (fn [data] 
+                      (binding [*websocket* ch]
+                        (let [thing (edn/read-string {:readers {'guid-chan find-chan-for-guid}} data)
+                              chan (:chan thing)
+                              msg (:msg thing)]
+                          (if (and chan msg)
+                            (go (>! chan msg))))))))
+
+(def base (atom (+ 1000000000000000 (long (rand 1000000000000000)))))
+
+
+(defn mguid 
+  "Make a GUID"
+  []
+  (str "G" (swap! base inc) "Z" (long (rand 100000000000)))
+  )
+
+
+
+(def chan-to-guid (atom {}))
+
+(def guid-to-chan (atom {}))
+
+(defn register-chan [chan guid]
+  (swap! chan-to-guid assoc chan guid)
+  (swap! guid-to-chan assoc guid chan))
+
+(defn find-guid-for-chan [chan]
+  (or (get @chan-to-guid chan)
+    (let [guid (mguid)]
+      (register-chan chan guid)
+      guid)))
+
+(defn find-chan-for-guid [guid]
+  (or (get @guid-to-chan guid)
+      (let [nc (chan)
+            socket *websocket*]
+        (register-chan nc guid)
+        (go
+          (loop []
+            (let [msg (<! nc)]
+              (hs/send! socket {:body (pr-str {:chan nc :msg msg})})
+              )
+            (recur)
+            )
+          )
+        nc)
+      ))
+
+(defn make-server-chan [name]
+ (let [ch (chan)]
+   (register-chan ch name)
+   ch)
+  )
+
+(def listeners (atom []))
+
+(def chats (atom []))
+
 
 (defn req-handler [_request]
   (hs/with-channel 
     _request
     channel 
     (let [request (fix_req _request)]
-      (if (hs/websocket? channel)  (do (println (str "Got request " request)) (ping-channel channel)))
+      (if (hs/websocket? channel)  (do (ping-channel channel)))
       (go
         (if (stuff :defined? request)
           (loop [res (stuff request)]
@@ -254,11 +319,25 @@
                             :body (str res)})))
           (hs/send! channel {:status 200
                            :headers {"content-type" "text/plain"}
-                           :body (str request)}))))))
+                           :body "{}"}))))))
 
 
 (defn start-server [port]
   (println "Running server on " port)
+  (go 
+    (let [server-chan (make-server-chan "The Chat Server")]
+      (while true
+        (let [v (<! server-chan)]
+          
+          (when-let [n (:add v)]
+            (swap! listeners #(conj % n))
+            (>! n @chats))
+          
+          (when-let [chat-msg (:msg v)]
+            (swap! chats #(conj % chat-msg))
+            (doseq [ch @listeners] (>! ch [chat-msg])))
+          ))))
+
   (reset! server-stopper (hs/run-server req-handler {:port port}))
   (println "Yep"))
 
@@ -269,6 +348,9 @@
       (do
          (fn)
           (reset! server-stopper nil)))))
+
+
+
 
 
 

@@ -1,34 +1,13 @@
 (ns demo.chat
   (:require-macros
-    [cljs.core.async.macros :as m :refer [go alt!]]
+    [cljs.core.async.macros :as m :refer [go]]
     [clang.angular :refer [def.controller defn.scope def.filter in-scope fnj]])
   (:use [clang.util :only [? module]])
   (:require [plugh.core :as pc]
             [cljs.core.async :as async
-             :refer [<! >! chan close! sliding-buffer put! alts!]]))
+             :refer [<! >! chan]]))
 
-(def listeners (atom []))
-
-(def chats (atom []))
-
-(def server-chan (chan))
-
-(go 
-  (while true
-    (let 
-      [v (<! server-chan)]
-      (cond
-        (:add v) 
-        (let [nc (:add v)]
-          (swap! listeners #(conj % nc))
-          (>! nc @chats))
-        (not (empty? (:msg v)))
-        (let [m (:msg v)]
-          (swap! chats #(conj % m))
-          (doseq [ch @listeners] (>! ch [m]) )
-          )
-        :else nil)
-      )))
+(def server-chan (pc/server-chan "The Chat Server"))
 
 (def.controller pc/m Chatter [$scope]
   (assoc! $scope :chats (clj->js []))

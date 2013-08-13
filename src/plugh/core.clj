@@ -1,15 +1,9 @@
 (ns plugh.core
   (:use 
     plugh.util.file
-    plugh.util.misc
-   
-    
+    plugh.util.misc 
     clojure.core.async)
-  (:require 
-    [plugh.util.js-compiler :as jsc]
-    [plugh.http.server :as ps]
-    [ plugh.html.parser :as wonky1]
-    [plugh.http.javascript :as wonky2])
+
   (:gen-class )
   )
 

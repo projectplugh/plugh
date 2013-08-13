@@ -7,13 +7,15 @@
   (:use [clang.util :only [? module]])
   (:require [cljs.core.logic :as cl]
             [cljs.reader :as cr]
-            [plugh.sloth :as sl]
             [cljs.core.async :as async
              :refer [<! >! chan close! sliding-buffer put! alts!]]))
+
+
 
 (def m (module "plugh.app" ["clang"]))
 
 (def base (atom (+ 1000000000000000 (long (rand 1000000000000000)))))
+
 
 (defn mguid 
   "Make a GUID"
@@ -21,33 +23,75 @@
   (str "G" (swap! base inc) "Z" (long (rand 100000000000)))
   )
 
-(.log js/console "Dude " (str (chan) " " (mguid) ))
+(def chan-to-guid (atom {}))
 
-(.log js/console "Dude 2 " (str [1 "moose" true {:a 33, :b "meow"} (chan) 3]))
+(def guid-to-chan (atom {}))
 
-;; (.log js/console "Dude 99 " (meta (vary-meta (chan) #(assoc % :guid "hi"))))
+(defn register-chan [chan guid]
+  (swap! chan-to-guid assoc chan guid)
+  (swap! guid-to-chan assoc guid chan))
 
-;; (.log js/console "Dude 3 " (cr/read-string (str [1 "moose" true {:a 33, :b "meow"} (chan) 3])))
+(defn find-guid-for-chan [chan]
+  (if (contains? @chan-to-guid chan)
+    (get @chan-to-guid chan)
+    (let [guid (mguid)]
+      (register-chan chan guid)
+      guid)))
+
+(declare send-to-server)
 
 
-(defn foo [] (sl/woff "hi"))
+(defn find-chan-for-guid [guid]
+  (or (get @guid-to-chan guid)
+      (let [nc (chan)]
+        (register-chan nc guid)
+        (go
+          (while true
+            (let [msg (<! nc)]
+              (send-to-server (pr-str {:chan nc :msg msg}))
+              )))
+        nc)
+      ))
 
-(foo)
+(extend-protocol IPrintWithWriter
+  cljs.core.async.impl.channels/ManyToManyChannel
+  (-pr-writer [chan writer opts]
+              (.log js/console "meow " @(.-closed chan))
+              (let [guid (find-guid-for-chan chan)]
+              (-write writer "#guid-chan\"")
+              (-write writer guid)
+              (-write writer "\""))))
+
+
+
+
+(defn ^:private guid-chan-reader
+  [s]
+  (find-chan-for-guid (str s)))
+
+(cr/register-tag-parser! "guid-chan" guid-chan-reader)
+
+(defn server-chan [name]
+  (find-chan-for-guid (str name))
+  )
+
 
 (declare comm)
 
 (defn setup-comm []
   (let [ret (new js/WebSocket "ws://localhost:9898/comet")]
-    (set! (.-onmessage ret) (fn [me] (.log js/console me)))
+    (set! (.-onmessage ret) (fn [me] 
+                              (do
+                                (let [info (.-data me)
+                                      parsed (cr/read-string info)
+                                      chan (:chan parsed)
+                                      msg (:msg parsed)]
+                                  (if (and chan msg)
+                                    (do 
+                                      (go (>! chan msg)))                             
+                                    )))))
+
     (set! (.-onopen ret) (fn [me] 
-                           (go 
-                             (loop [x 1]
-                             (<! (async/timeout 500000))
-                             (.send ret (str "howdy #" x))
-                             (.log js/console (str "sent: howdy #" x " ready state " (.-readyState ret)))
-                             (if (= 1 (.-readyState ret)) (recur (inc x)))
-                             ))
-                           
                            (.log js/console (str "socket open " (.stringify js/JSON me)))))
     (set! (.-onclose ret) (fn [me]
                             (set! comm (setup-comm))
@@ -56,42 +100,14 @@
 
 (def comm (atom (setup-comm)))
 
-(def.controller m TodoCtrl [$scope]
-  (assoc! $scope :todos [{:text "learn angular" :done "yes"}
-                         {:text "learn cljs" :done "yes"}
-                         {:text "build an app" :done "no"}])
-  
-  
-  (assoc! $scope :meow (atom ""))
-  
-  (assoc! $scope :nums (atom (range 1 10)))
-  
-  (assoc! $scope :bool true)
-  
-  (defn.scope addone [[x _]]
-    (+ 1 x))
-  
-  (defn.scope remaining []
-    (->>
-      (:todos $scope)
-      (map :done)
-      (remove #{"yes"})
-      count)))
+(defn send-to-server [msg] 
+  (go
+    (loop []
+      (let [c @comm
+            ms msg]
+        (if (= 1 (.-readyState c))
+          (.send c ms)
+          (let [to (async/timeout 50)]
+            (recur))
+          )))))
 
-
-(def.controller m Wombat [$scope]
-  
-  
-  (assoc! $scope :thing "hi, dude")
-  
-  (assoc! $scope :wombat (clj->js ["foo" "bar" "baz"]))
-  
-  (defn.scope indexes [x] (range 0 (count x)))
-  
-  (defn.scope dothing [x] 
-    (.log js/console "hi")
-    (.log js/console (str "Sending " (:thing $scope)))
-    (assoc! $scope :thing "")
-    )
-  
-  (defn.scope dude [x] (str "Hello " x)))

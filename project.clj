@@ -8,6 +8,7 @@
                  [org.clojure/core.match "0.2.0-rc4"]
                  [org.clojure/core.logic "0.8.3"]
                  [org.clojure/core.async "0.1.0-SNAPSHOT"]
+                 [org.clojure/tools.namespace "0.2.4"]
                  ;; [org.clojure/clojurescript "0.0-1847"]
                  [org.clojure/data.json "0.2.2"]
                  [nu.validator.htmlparser/htmlparser "1.4"]
@@ -24,7 +25,7 @@
                            :pretty-print true}}
                
                :prod
-               {:source-paths ["clang_code" "resources/apps"]
+               {:source-paths ["clang_code" "resources/apps" "resource/shared"]
                 :compiler {:output-to "resources/target/js/clang.js"
                            :pretty-print false
                            :optimizations :advanced}}
