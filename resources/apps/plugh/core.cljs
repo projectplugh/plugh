@@ -46,23 +46,23 @@
       (let [nc (chan)]
         (register-chan nc guid)
         (go
-          (while true
+          (let [run (atom true)]
+          (while @run
             (let [msg (<! nc)]
+              (if msg
               (send-to-server (pr-str {:chan nc :msg msg}))
-              )))
+              (swap! run false)
+              )))))
         nc)
       ))
 
 (extend-protocol IPrintWithWriter
   cljs.core.async.impl.channels/ManyToManyChannel
   (-pr-writer [chan writer opts]
-              (.log js/console "meow " @(.-closed chan))
               (let [guid (find-guid-for-chan chan)]
               (-write writer "#guid-chan\"")
               (-write writer guid)
               (-write writer "\""))))
-
-
 
 
 (defn ^:private guid-chan-reader
@@ -107,7 +107,7 @@
             ms msg]
         (if (= 1 (.-readyState c))
           (.send c ms)
-          (let [to (async/timeout 50)]
+          (let [to (<! (async/timeout 50))]
             (recur))
           )))))
 

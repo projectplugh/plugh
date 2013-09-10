@@ -11,7 +11,7 @@
 
 (def.controller pc/m Chatter [$scope]
   (assoc! $scope :chats (clj->js []))
-  
+
   (assoc! $scope :line "")
   
   (defn.scope send [] 

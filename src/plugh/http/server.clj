@@ -328,7 +328,6 @@
     (let [server-chan (make-server-chan "The Chat Server")]
       (while true
         (let [v (<! server-chan)]
-          
           (when-let [n (:add v)]
             (swap! listeners #(conj % n))
             (>! n @chats))
@@ -338,8 +337,8 @@
             (doseq [ch @listeners] (>! ch [chat-msg])))
           ))))
 
-  (reset! server-stopper (hs/run-server req-handler {:port port}))
-  (println "Yep"))
+  (reset! server-stopper (hs/run-server req-handler {:port port})))
+  
 
 (defn stop-server []
   (let [fn @server-stopper]
