@@ -4,6 +4,7 @@
         clojure.core.async)
   (:require 
     [plugh.util.misc :as pm]
+    [plugh.util.js-compiler :as jc]
     [clojure.java.io :as io]
     [org.httpkit.server :as hs]
     [clojure.edn :as edn]
@@ -322,6 +323,7 @@
                            :body "{}"}))))))
 
 
+
 (defn start-server [port]
   (println "Running server on " port)
   (go 
@@ -336,6 +338,15 @@
             (swap! chats #(conj % chat-msg))
             (doseq [ch @listeners] (>! ch [chat-msg])))
           ))))
+  
+  (go
+    (let [compiler-chan (make-server-chan "cljs compiler")]
+      (while true
+        (let [v (<! compiler-chan)]
+          (when-let [from (:from v)]
+            (let [res (try (jc/compile-string (:source v)) (catch Exception e (do (println "we gots an exception " e) e)))
+                  to-send (if (instance? Exception res) {:org v :error (str res)} {:org v :result res})]
+              (>! from to-send)))))))
 
   (reset! server-stopper (hs/run-server req-handler {:port port})))
   

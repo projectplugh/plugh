@@ -41,6 +41,8 @@
 (defmacro in-scope [& body]
   `(.$apply ~'$scope (fn [] ~@body)))
 
+(defmacro s-set [k value] `(assoc! ~'$scope ~k ~value))
+
 (defmacro def.fn [module n args & body]
   `(.value ~module ~(name n) (fn ~args ~@body)))
 

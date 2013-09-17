@@ -5,14 +5,14 @@
     [cljs.core.async.macros :as m :refer [go alt!]]
     [clang.angular :refer [def.controller defn.scope def.filter fnj]])
   (:use [clang.util :only [? module]])
-  (:require [cljs.core.logic :as cl]
+  (:require
             [cljs.reader :as cr]
             [cljs.core.async :as async
              :refer [<! >! chan close! sliding-buffer put! alts!]]))
 
 
 
-(def m (module "plugh.app" ["clang"]))
+(def m (module "plugh.app" ["clang", "ngGrid"]))
 
 (def base (atom (+ 1000000000000000 (long (rand 1000000000000000)))))
 
@@ -40,19 +40,17 @@
 
 (declare send-to-server)
 
+(defn forward-msg [nc guid]
+  (go
+      (let [msg (<! nc)]
+            (send-to-server (pr-str {:chan nc :msg msg}))
+            (forward-msg nc guid))))
 
 (defn find-chan-for-guid [guid]
   (or (get @guid-to-chan guid)
       (let [nc (chan)]
         (register-chan nc guid)
-        (go
-          (let [run (atom true)]
-          (while @run
-            (let [msg (<! nc)]
-              (if msg
-              (send-to-server (pr-str {:chan nc :msg msg}))
-              (swap! run false)
-              )))))
+        (forward-msg nc guid)
         nc)
       ))
 
@@ -101,13 +99,14 @@
 (def comm (atom (setup-comm)))
 
 (defn send-to-server [msg] 
-  (go
-    (loop []
-      (let [c @comm
-            ms msg]
-        (if (= 1 (.-readyState c))
-          (.send c ms)
-          (let [to (<! (async/timeout 50))]
-            (recur))
+  (let [c @comm
+        ms msg]
+    (if (= 1 (.-readyState c))
+      (do
+        (.send c ms))
+      (go
+        (let [to (<! (async/timeout 50))]
+          (send-to-server msg)
           )))))
+
 

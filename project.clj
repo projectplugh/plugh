@@ -6,15 +6,19 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [http-kit "2.1.5"]
                  [org.clojure/core.match "0.2.0-rc5"]
+                 [org.clojure/tools.reader "0.7.7"]
                  [org.clojure/core.logic "0.8.3"]
+                 ;; [org.clojure/core.async "0.1.0-SNAPSHOT"]
                  [org.clojure/core.async "0.1.0-SNAPSHOT"]
                  ;; [org.clojure/tools.namespace "0.2.4"]
-                 ;; [org.clojure/clojurescript "0.0-1847"]
+                 [org.clojure/clojurescript "0.0-1859"]
                  [org.clojure/data.json "0.2.2"]
                  ;; [nu.validator.htmlparser/htmlparser "1.4"]
                  ]
   
-  :plugins [[lein-cljsbuild "0.3.2"]]
+  :plugins [[lein-cljsbuild "0.3.3"]]
+  
+  :hooks [leiningen.cljsbuild]
   
   :cljsbuild {
               :builds
@@ -28,13 +32,13 @@
                {:source-paths ["clang_code" "resources/apps" "resource/shared"]
                 :compiler {:output-to "resources/target/js/clang.js"
                            :pretty-print false
-                           :optimizations :advanced}}
+                           :optimizations :whitespace}}
                
                :pre-prod
                {:source-paths ["clang_code" "resources/apps"]
                 
                 :compiler {:output-to "resources/target/js/clang_pre.js"
-                           :optimizations :simple
+                           :optimizations :whitespace
                            :pretty-print false
                            }}}
               }

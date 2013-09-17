@@ -2,100 +2,32 @@
 <html ng-app="plugh.app">
 <head>
 	<title>Hi</title>
+	<link rel="stylesheet" type="text/css" href="/css/ng-grid.css" />
 	<script type="text/javascript" src="/js/angular.js"></script>
+	<script type="text/javascript" src="/js/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="/js/ng-grid-2.0.7.debug.js"></script>
 	<script type="text/javascript" src="/js/clang_dbg.js"></script>
 </head>
 <body>
-	<!--
-	index.html <b>dude</b>
 
-	<input ng-model="name">
-	<p>Hello {{name}}!</p>
-
-	<div ng-init="list = ['Chrome', 'Safari', 'Firefox', 'IE'] "> <input ng-model="list" ng-list> <br>
-		<input ng-model="list" ng-list> <br> <pre>list={{list}}</pre> <br>
-		<ol>
-			<li ng-repeat="item in list">
-				{{item}}
-			</li>
-		</ol>
-	</div>
-
-	<div ng-controller="TodoCtrl">
-		<div>{{(map :text todos)}}</div>
-		<h2>Function composition within template expressions</h2>
-		<table>
-			<tr clang-repeat="group in (drop 1 (partition 3 @nums))">
-				<td clang-repeat="x in (map (juxt identity odd?) group)">
-					{{x}}
-				</td> 
-			</tr>
-		</table>
-
-		<table>
-			<tr clang-repeat="group in (drop 1 (partition 3 @nums))">
-				<td clang-repeat="x in (map (juxt identity odd?) group)">
-					{{x}}: {{(first x)}} + 1 = {{(addone x)}} = {{(addone x)}}. {{(first x)}} is {{(if (last x) "odd" "even")}}
-				</td>
-			</tr>
-		</table>
-
-		<table>
-			<tr clang-repeat="group in (drop 1 (partition 3 @nums))">
-				<td clang-repeat="x in (map (juxt identity odd?) group)">
-					{{x}}: {{(first x)}} + 1 = {{(addone x)}} = {{(addone x)}}. {{(first x)}} is {{(if (last x) "odd" "even")}}
-				</td>
-			</tr>
-		</table>
-
-	</div>
-
-	<h2>here's stuff</h2>
-
-	<div ng-controller="Wombat">
-		<input ng-model="thing"> <button ng-click="dothing()">Thing</button>
-
-		<div ng-repeat="n in wombat">
-			<div>{{(dude n)}}</div>
-		</div>
-
-		<input ng-model="wombat" ng-list>
-
-		<hr>
-
-	</div>
--->
 
 	<h2>Chat</h2>
 
-	<div ng-controller="Chatter">
+	<div ng-controller="Chatter" id="thingy">
 		<ul>
 			<li ng-repeat="n in chats">{{n}}</li>
 		</ul>
 
 		<input ng-model="line"><button ng-click="send()">Send</button>
+
+		<hr>
+		<button ng-click="more()">More</button>
+		<hr>
+
+
+		<div class="gridStyle" ng-grid="gridOptions" style="height: 200px"></div>
+
 	</div>
-
-<!-- </div>
-
-	<canvas id="sloth" width="1000px" height="400px"></canvas>
-	<script>
-	var canvas = document.getElementById("sloth");
-	var ctx = canvas.getContext("2d");
-	ctx.fillStyle = "rgb(200,0,0)";
-	ctx.fillRect (10, 10, 55, 50);
-		// ctx.translate(0, 400);
-	ctx.transform(0, -1, 1, 0, 0, 400);
-	ctx.beginPath();
-	ctx.strokeStyle = "rgb(200,0,0)";
-	ctx.moveTo(0,0);
-	for (var x = 1; x < 300; x++) {
-		ctx.lineTo(x, x);
-	}
-	ctx.stroke();
-	</script>
-
--->
 
 </body>
 </html>
