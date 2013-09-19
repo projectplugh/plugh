@@ -13,19 +13,21 @@
 
 	<h2>Chat</h2>
 
-	<div ng-controller="Chatter" id="thingy">
+	<div ng-controller="Chatter">
 		<ul>
 			<li ng-repeat="n in chats">{{n}}</li>
 		</ul>
 
 		<input ng-model="line"><button ng-click="send()">Send</button>
+	</div>
 
+	<div ng-controller="Visicalc" id="thingy">
 		<hr>
 		<button ng-click="more()">More</button>
 		<hr>
 
 
-		<div class="gridStyle" ng-grid="gridOptions" style="height: 200px"></div>
+		<div class="gridStyle" ng-grid="gridOptions" style="height: 150px"></div>
 
 	</div>
 
