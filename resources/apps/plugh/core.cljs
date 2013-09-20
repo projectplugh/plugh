@@ -109,4 +109,17 @@
           (send-to-server msg)
           )))))
 
+(defn to-num [x] 
+  (cond 
+    (number? x) x
+    (string? x) (js/parseFloat x)
+    :else 0))
 
+(defn sum [x]
+  (let [mapped (map to-num x)
+        ret (reduce + 0 mapped)]
+  ret
+  ))
+
+(defn avg [x]
+  (if (empty? x) 0 (/ sum (count x))))

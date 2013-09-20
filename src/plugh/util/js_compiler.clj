@@ -200,9 +200,12 @@
     delay {:name cljs.core.delay},
     apply {:name cljs.core.apply},
     swap! {:name cljs.core.swap!},
+    sum {:name plugh.core.sum},
+    avg {:name plugh.core.avg},
     subvec {:name cljs.core.subvec},
     rest {:name cljs.core.rest},
     keyword {:name cljs.core.keyword},
+    to-num {:name plugh.core.to-num}
     mod {:name cljs.core.mod},
     nfirst {:name cljs.core.nfirst},
     nthnext {:name cljs.core.nthnext},
@@ -259,7 +262,7 @@
 
 (def cljs-macros (quote #{== time doseq bit-or nil? for bit-set false? true? bit-xor dotimes defmethod + this-as defrecord * - identical? bit-flip zero? bit-and / neg? assert inc bit-not aset bit-clear extend-type condp < amap > max >= bit-shift-left deftype <= pos? defmulti reify mod dec undefined? aget try bit-shift-right lazy-seq areduce alength defprotocol bit-and-not satisfies? assert-args binding min bit-test}))
 
-(def clojure-macros (set '[-> ->> .. and assert comment cond declare defn defn-
+(def clojure-macros (set '[-> ->> .. some-> and assert comment cond declare defn defn-
                            doto extend-protocol fn for if-let if-not let letfn loop
                            or when when-first when-let when-not while]))
 
@@ -340,13 +343,41 @@
 (defn- not-hash-keyword? [x]
   (and (keyword? x) (not (. (name x) startsWith "#"))))
 
+(defn- wrap-total [func t-fn]
+  (if t-fn 
+    (let [master '(fn [lines]
+                   (let [ret-a (into [] (func# lines))
+                         total (into {} (map (fn [[k f]] [k (f (map k ret-a))]) pairs#))]
+                     (conj ret-a total)
+                     )
+                   )]
+      (replace-in master {'func# func 
+                          'pairs# (into [] (map #(into [] %) (partition 2 (rest t-fn))))}))
+    func))
+
+(defn- wrap-last [lst f-func t-func]
+  (let [most (butlast lst)
+        the-last (wrap-total (last lst) (first t-func))
+        ]
+    (conj (into [] most)
+          (reduce (fn [inner c-fil] 
+                    (let [master '(fn [lines] (inner# (filter (fn [it] func#) lines)))]
+                      (replace-in master {'inner# inner 'func# (rest c-fil)}))
+                    ) the-last f-func)
+          )))
+
 (defn compile-string [s] 
   (let [org-forms (read-forms s)
-        filter-func (filter #(= :#filter %) org-forms)
+        filter-func (filter #(-> % first (= :#filter)) org-forms)
+        total-func (filter #(-> % first (= :#total)) org-forms)
         named (filter #(-> % first not-hash-keyword?) org-forms)
         funcs (filter #(-> % first keyword? not) org-forms)
-        rewritten (append-not-nil funcs (build-from-named named))]
-    (map #(:result (compilation % :simple false)) rewritten)))
+        rewritten (wrap-last 
+                    (append-not-nil funcs (build-from-named named))
+                    filter-func total-func)]
+    (let [ret (map #(:result (compilation % :simple false)) rewritten)]
+      ret
+      )))
 
 ;; privates
 
@@ -367,4 +398,5 @@
     (let [sym (symbol (.getName sym))]
       (when (and mvar (or (clojure-macros sym) (cljs-macros sym)))
         @mvar))))
+
 

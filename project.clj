@@ -18,7 +18,7 @@
   
   :plugins [[lein-cljsbuild "0.3.3"]]
   
-  :hooks [leiningen.cljsbuild]
+;;  :hooks [leiningen.cljsbuild]
   
   :cljsbuild {
               :builds
