@@ -9,8 +9,6 @@
 
 (def server-chan (pc/server-chan "The Chat Server"))
 
-(def compiler-chan (pc/server-chan "cljs compiler"))
-
 (def.controller pc/m Chatter [$scope $compile]
   (s-set :chats (clj->js []))
   
@@ -25,11 +23,10 @@
   
   (let [rc (chan)]
     (go (>! server-chan {:add rc}))
-    (letfn [(proc [] 
-                  (go (let [chats (<! rc)]
-                        (in-scope (doseq [m chats] (.push (:chats $scope) m)))
-                        (proc))))]
-      (proc)))
+    (go (while true 
+          (let [chats (<! rc)]
+            (in-scope (doseq [m chats] 
+                        (.push (:chats $scope) m)))))))
   )
     
     

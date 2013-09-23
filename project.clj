@@ -12,9 +12,12 @@
                  [org.clojure/core.async "0.1.0-SNAPSHOT"]
                  ;; [org.clojure/tools.namespace "0.2.4"]
                  [org.clojure/clojurescript "0.0-1859"]
-                 [org.clojure/data.json "0.2.2"]
+                 ;; [org.clojure/data.json "0.2.2"]
+                 [instaparse "1.2.2"]
                  ;; [nu.validator.htmlparser/htmlparser "1.4"]
                  ]
+  
+  :profiles {:dev {:dependencies [[midje "1.5.0"]]}}
   
   :plugins [[lein-cljsbuild "0.3.3"]]
   

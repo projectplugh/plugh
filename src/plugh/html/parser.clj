@@ -1,4 +1,4 @@
-(ns plugh.html.parser
+(comment (ns plugh.html.parser
   ^{:doc "HTML Parser and such"
     :author "David Pollak"}
   (:use plugh.util.misc
@@ -44,4 +44,4 @@
     (. parser setLexicalHandler handler)
     (. parser parse str )
     ((:content *current*) 0))))
-)
+))
