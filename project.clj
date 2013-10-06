@@ -5,11 +5,11 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [http-kit "2.1.5"]
-                 [org.clojure/core.match "0.2.0-rc5"]
+                 [org.clojure/core.match "0.2.0"]
                  [org.clojure/tools.reader "0.7.7"]
                  [org.clojure/core.logic "0.8.3"]
                  ;; [org.clojure/core.async "0.1.0-SNAPSHOT"]
-                 [org.clojure/core.async "0.1.0-SNAPSHOT"]
+                 [org.clojure/core.async "0.1.242.0-44b1e3-alpha"]
                  ;; [org.clojure/tools.namespace "0.2.4"]
                  [org.clojure/clojurescript "0.0-1859"]
                  ;; [org.clojure/data.json "0.2.2"]

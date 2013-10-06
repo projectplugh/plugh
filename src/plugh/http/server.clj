@@ -1,8 +1,8 @@
 (ns plugh.http.server
   (:gen-class)
-  (:use plugh.util.file
-        clojure.core.async)
+  (:use plugh.util.file)
   (:require 
+    [clojure.core.async :as async :refer [go chan timeout]]
     [plugh.util.misc :as pm]
     [plugh.util.js-compiler :as jc]
     [clojure.java.io :as io]

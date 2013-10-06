@@ -39,40 +39,10 @@
   VectorExpr = SPACES? <'['> (EXPRESSION <','>)* EXPRESSION (<','> SPACES?)? <']'> SPACES?
   Pair = EXPRESSION <'->'> EXPRESSION
   StringLit = <'\"'> ('\\\"' / #'[^\"]')* <'\"'>
-  Operator = '+' | '-' | '*' | '/' | '&' | '>' | '<' | '==' | '>=' | '<=' | '&&' | '||' | '<>' | '-?>' | ':=' | ':>='
+  Operator = '+' | '-' | '*' | '/' | '&' | '>' | '<' | '==' | '>=' | '<=' | '&&' | '||' | '<>' | '$' | ':=' | ':>='
   " )
 
-(def example "source: twitter
 
-add-sentiment(tweet) = tweet.text -?> calc-sentiment -?> (tweet.sentiment := )
-
-             
-with-sentiment = begin xform-some(add-sentiment, twitter) end
-
-             
-filtered-sentiment = 
-  filter( x => sent = x.sentiment
-               ((sent.pos > 2) || 
-               (sent.neg < -2)), 
-          with-sentiment)
-
-average-sentiment = reduce( (c, t) => c :>= {.pos-sum -> ( + t.sentiment.pos),
-                                             .neg-sum -> ( + t.sentiment.neg),
-                                             .pos-cnt -> inc,
-                                             .neg-cnt -> inc} , 
-                           {.pos-sum -> 0, .neg-sum -> 0, 
-                            .pos-cnt -> 0, .neg-cnt -> 0} , filtered-sentiment)
-
-             
-             
-groups = group-by(twitter, ( -?> .date -?> date-to-int -?> ( / 10:minutes )) )
-
-             
-sink: buckets = groups
-
-sink: averages = average-sentiment
-
-")
 
 
 (def the-parser
