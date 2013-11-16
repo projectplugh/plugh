@@ -56,7 +56,7 @@
 
   ICounted
   (-count [o]
-    (obj-only o :count)
+    ;; (obj-only o :count)
     (.-length (js-keys o)))
 
   IAssociative

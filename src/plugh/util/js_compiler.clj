@@ -3,7 +3,8 @@
             [cljs.compiler :as comp]
             [cljs.analyzer :as ana]
             [cljs.source-map :as sm]
-            [clojure.tools.reader :as r])
+            [clojure.tools.reader :as r]
+            [plugh.util.misc :as misc :refer [-->]])
   (:import [java.io PushbackReader BufferedReader StringReader]
            [clojure.lang ISeq]
            [javax.script ScriptEngineManager]))
@@ -197,7 +198,7 @@
     map-indexed {:name cljs.core.map-indexed},
     contains? {:name cljs.core.contains?},
     interpose {:name cljs.core.interpose},
-    delay {:name cljs.core.delay},
+    ;; delay {:name cljs.core.delay},
     apply {:name cljs.core.apply},
     swap! {:name cljs.core.swap!},
     sum {:name plugh.core.sum},
@@ -254,15 +255,22 @@
     min {:name cljs.core.min},
     bit-test {:name cljs.core.bit-test},
     keep {:name cljs.core.keep},
+    chan {:name cljs.core.async.chan},
+    mult {:name cljs.core.async.mult},
+    tap {:name cljs.core.async.tap},
+    calc-sentiment {:name plugh.util.sent-analysis.calc-sentiment},
+    xform {:name plugh.util.sent-analysis.xform},
+    xfilter {:name plugh.util.sent-analysis.xfilter},
+    flow {:name plugh.util.sent-analysis.flow},
     meta {:name cljs.core.meta},
     prim-seq {:name cljs.core.prim-seq}})
 
 (defn load-core-names []
   core-names)
 
-(def cljs-macros (quote #{== time doseq bit-or nil? for bit-set false? true? bit-xor dotimes defmethod + this-as defrecord * - identical? bit-flip zero? bit-and / neg? assert inc bit-not aset bit-clear extend-type condp < amap > max >= bit-shift-left deftype <= pos? defmulti reify mod dec undefined? aget try bit-shift-right lazy-seq areduce alength defprotocol bit-and-not satisfies? assert-args binding min bit-test}))
+(def cljs-macros (quote #{== time delay doseq --> bit-or nil? for bit-set false? true? bit-xor dotimes defmethod + this-as defrecord * - identical? bit-flip zero? bit-and / neg? assert inc bit-not aset bit-clear extend-type condp < amap > max >= bit-shift-left deftype <= pos? defmulti reify mod dec undefined? aget try bit-shift-right lazy-seq areduce alength defprotocol bit-and-not satisfies? assert-args binding min bit-test}))
 
-(def clojure-macros (set '[-> ->> .. some-> and assert comment cond declare defn defn-
+(def clojure-macros (set '[-> ->> .. some-> arrow-assignment --> and assert comment cond declare defn defn-
                            doto extend-protocol fn for if-let if-not let letfn loop
                            or when when-first when-let when-not while]))
 
@@ -387,6 +395,8 @@
                       (-> env :ns :excludes sym))
           (if-let [nstr (namespace sym)]
             (when-let [ns (cond
+                            (= (str sym) "plugh.util.misc/-->") (find-ns 'plugh.util.misc)
+                            (= (str sym) "plugh.util.misc/arrow-assignment") (find-ns 'plugh.util.misc)
                            (= "clojure.core" nstr) (find-ns 'cljs.core)
                            (.contains nstr ".") (find-ns (symbol nstr))
                            :else

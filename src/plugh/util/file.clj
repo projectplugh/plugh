@@ -1,5 +1,4 @@
 (ns plugh.util.file
-  (:gen-class)
   (:use [clojure.java.io])
   )
 

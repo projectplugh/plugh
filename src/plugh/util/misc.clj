@@ -106,11 +106,21 @@
     (todo)))
 )
 
+(defmacro arrow-assignment [left right] 
+  "This is a hacky hack for multi-level arrows"
+  (let [the-sym (second left)
+        the-kwd (nth left 2)]
+    `(assoc ~the-sym ~the-kwd ~right)
+    )
+  )
+
+
+
 (defmacro --> 
   "Kinda like threading, but with nil testing"
   ([x] x)
   ([x func] 
-   `(if (not (nil? ~x)) (apply ~func [~x])))
+   `(if (not (= nil ~x)) (apply ~func [~x])))
   ([x func & rest]
    `(--> (--> ~x ~func) ~@rest))
   )
@@ -118,4 +128,13 @@
 (defn deref? [it]
   "Is it something that deref can be called on?"
   (instance? clojure.lang.IDeref it))
+
+(def base (atom (+ 1000000000000000 (long (rand 1000000000000000)))))
+
+
+(defn mguid
+  "Make a GUID"
+  []
+  (str "G" (swap! base inc) "Z" (long (rand 100000000000)))
+  )
 

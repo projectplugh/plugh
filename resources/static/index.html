@@ -9,26 +9,23 @@
 	<script type="text/javascript" src="/js/clang_dbg.js"></script>
 </head>
 <body>
-
-
-	<h2>Chat</h2>
-
-	<div ng-controller="Chatter">
-		<ul>
-			<li ng-repeat="n in chats">{{n}}</li>
-		</ul>
-
-		<input ng-model="line"><button ng-click="send()">Send</button>
-	</div>
-
 	<div ng-controller="Visicalc" id="thingy">
+		<textarea cols="120" rows="30" ng-model="visiCode"></textarea>
+
+		<br>
+		<button ng-click="runTheVisiDemo()">run on server</button>
+
+		<button ng-click="compileVisiToJs()">run in browser</button>
+
 		<hr>
-		<button ng-click="more()">More</button>
-		<hr>
-
-
-		<div class="gridStyle" ng-grid="gridOptions" style="height: 150px"></div>
-
+		<div>
+			Neg Count {{sentiment['neg-cnt']}}<br>
+			Neg Sum {{sentiment['neg-sum']}}<br>
+			Neg Avg {{sentiment['neg-sum'] / sentiment['neg-cnt']}}<br>
+			Pos Count <span>{{sentiment['pos-cnt']}}</span><br>
+			Pos Sum <span>{{sentiment['pos-sum']}}</span><br>
+			Pos Avg {{sentiment['pos-sum'] / sentiment['pos-cnt']}}<br>
+		</div>
 	</div>
 
 </body>

@@ -10,6 +10,25 @@
 
 (def compiler-chan (pc/server-chan "cljs compiler"))
 
+(def visi-chan (pc/server-chan "visi-dispatch"))
+
+(defn send-to-chan [chan info]
+  (str 
+    (map 
+      (fn [x] 
+        (do 
+          (.log js/console "sending " (str x))
+          (go (>! chan x)))) info)))
+
+(defn read-from-chan [chan func]
+  (go 
+    (let [v (<! chan)]
+      (.log js/console "Read " (str v))
+      (func v)
+      (read-from-chan chan func)
+      )))
+
+
 (def.controller pc/m Visicalc [$scope $compile]
   (let [update-func (fn [name org-data]
     (let [kw (keyword name)
@@ -29,6 +48,57 @@
                                    {:name "Tessa" :age 1}
                                    {:name "Sloth" :age 2}]))
   
+  (s-set :sentiment (clj->js  {:neg-cnt nil, :neg-sum "", :pos-sum "", :pos-cnt ""}))
+  
+  (s-set :visiCode "")
+  
+  (s-set :sample [{:text
+    "RT @USATODAY: Here's where the current #shutdown stands: http://t.co/YI8NQ7s5wB",
+    :id 386496793292570624,
+    :created_at "Sat Oct 05 14:23:10 +0000 2013"}
+   {:text
+    "Great article by @ezraklein Republican Cilvil War\nhttp://t.co/UoWqCyHk1z #shutdown",
+    :id 386496819141672960,
+    :created_at "Sat Oct 05 14:23:17 +0000 2013"}
+   {:text
+    "RT @Forbes: What caused the U.S. government #shutdown? http://t.co/GTPTG7TJfu",
+    :id 386496819661774848,
+    :created_at "Sat Oct 05 14:23:17 +0000 2013"}
+   {:text
+    "RT @USATODAY: Here's where the current #shutdown stands: http://t.co/YI8NQ7s5wB",
+    :id 386496852188622852,
+    :created_at "Sat Oct 05 14:23:24 +0000 2013"}
+   {:text ".@Barackobama End the #shutdown! #DefundObamacare",
+    :id 386496855804100608,
+    :created_at "Sat Oct 05 14:23:25 +0000 2013"}
+   {:text "What about this #shutdown",
+    :id 386496857716695040,
+    :created_at "Sat Oct 05 14:23:26 +0000 2013"}
+   {:text
+    "The #HouseGOP the extremists in the #TeaParty.  RT @Forbes: What caused the U.S. government #shutdown? http://t.co/AxOmCJVBEZ",
+    :id 386496867170664448,
+    :created_at "Sat Oct 05 14:23:28 +0000 2013"}
+   {:text
+    "RT @USATODAY: Here's where the current #shutdown stands: http://t.co/YI8NQ7s5wB",
+    :id 386496876045819904,
+    :created_at "Sat Oct 05 14:23:30 +0000 2013"}
+   {:text
+    "RT @SpeakerBoehner: WH says govt #shutdown “doesn’t really matter” http://t.co/MyjWJmVUIO GOP continues taking action to keep critical part…",
+    :id 386496877178662912,
+    :created_at "Sat Oct 05 14:23:30 +0000 2013"}
+   {:text
+    "RT @traciglee: \"We cannot have a wholesale #shutdown and a piecemeal startup.\" http://t.co/JhjDbtYtaz",
+    :id 386496881078960129,
+    :created_at "Sat Oct 05 14:23:31 +0000 2013"}
+   {:text
+    "RT @zypldot: Don't let the #shutdown die down this weekend! #BlameHarryReid and let @SpeakerBoehner now we #StandWithBoehner. @SenTedCruz",
+    :id 386496881867517952,
+    :created_at "Sat Oct 05 14:23:32 +0000 2013"}
+   {:text
+    "RT @TangiQuemener: Pendant ce temps, tempête #Karen remonte vers les côtes du golfe du Mexique. Personnel d'urgence fédéral mobilisé, mais …",
+    :id 386496888352284672,
+    :created_at "Sat Oct 05 14:23:33 +0000 2013"}])
+    
   (s-set :gridOptions 
          (clj->js 
            {:data "myData"
@@ -42,6 +112,46 @@
                           :enableCellEdit true}]
             }))
   
+  (defn.scope runTheVisiDemo []
+    (let [the-code (:visiCode $scope)
+          ch (chan)]
+      (.log js/console "the code is " the-code)
+      (go (>! visi-chan {:cmd "run-demo-code" :to-chan ch :code the-code}))
+      (go
+        (loop []
+          (let [v (<! ch)]
+            (if (not v) [] (do 
+                             ;; (.log js/console "Got from server " v)
+                             (in-scope (s-set :sentiment (clj->js v)))
+                             (recur))
+              ))))))
+  
+  (defn.scope compileVisiToJs []
+    (let [the-code (:visiCode $scope)
+          ch (chan)]
+      (go (>! visi-chan {:cmd "compile-to-js" :to-chan ch :code the-code}))
+      (go (let [res (<! ch)]
+            (when (:error res) (js/alert (str (:error res))))
+            (when-let 
+              [blocks (:js-code res)]
+              (js/eval "if (!cljs) cljs = {};\n")
+              (js/eval "if (!cljs.user) cljs.user = {};")
+              (str (map (fn [x] (do
+                                   (js/eval (str x ";")))) blocks))
+              (let [tchan cljs.user/twitter
+                    res-chan (async/tap (deref cljs.user/averages) (async/chan))]
+                
+                (in-scope (s-set :sentiment (clj->js {})))
+                       
+                (send-to-chan tchan (:sample $scope))
+                
+                (read-from-chan 
+                  res-chan 
+                  (fn [info]
+                    (in-scope (s-set :sentiment (clj->js info)))))
+                
+                (.log js/console "Done"))))
+          )))
   
   (defn.scope updateFunc [id]
     (let [on (keyword (str id "_opt"))]

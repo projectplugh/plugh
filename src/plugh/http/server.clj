@@ -1,5 +1,4 @@
 (ns plugh.http.server
-  (:gen-class)
   (:use plugh.util.file)
   (:require 
     [clojure.core.async :as async :refer [go chan timeout]]
@@ -8,6 +7,8 @@
     [clojure.java.io :as io]
     [org.httpkit.server :as hs]
     [clojure.edn :as edn]
+    [plugh.demo.cconj :as cc]
+    [plugh.visi.parser :as visi]
     ))
 
 
@@ -347,6 +348,34 @@
             (let [res (try (jc/compile-string (:source v)) (catch Exception e (do (println "we gots an exception " e) e)))
                   to-send (if (instance? Exception res) {:org v :error (str res)} {:org v :result res})]
               (>! from to-send)))))))
+  (go
+    (let [visi-chan (make-server-chan "visi-dispatch")]
+      (while true
+        (let [v (<! visi-chan)]
+          (println "We got message " v)
+          (cond 
+            (= "run-demo-code" (:cmd v))
+              (cc/send-demo-data-to (:code v) (:to-chan v))
+            (= "compile-to-js" (:cmd v))
+              (try
+                (do 
+                  (println "On server for " v)
+                 (let [res (visi/visi-compile (visi/visi-parse (:code v)) 'cconj.demo true)
+                       code (:code res)
+                       code-str (clojure.string/join "\n" (map pr-str (drop 2 code)))
+                       foo (println "str code is " code-str)
+                       js-res (jc/compile-string code-str)]
+                   (println "Compiled result " js-res)
+                   (>! (:to-chan v) {:js-code js-res})
+                   )) 
+                (catch Exception e  (do (println "we gots an exception " e))
+                        (>! (:to-chan v) {:error (str e)})
+                        ))
+            :else (println "Unknown " v)
+            )
+          )
+        )
+      ))
 
   (reset! server-stopper (hs/run-server req-handler {:port port})))
   

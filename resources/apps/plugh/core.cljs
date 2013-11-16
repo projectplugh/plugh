@@ -1,6 +1,4 @@
 (ns plugh.core
-  (:use-macros 
-    [cljs.core.logic.macros :only [run* conde == defrel fact]])
   (:require-macros
     [cljs.core.async.macros :as m :refer [go alt!]]
     [clang.angular :refer [def.controller defn.scope def.filter fnj]])

@@ -6,15 +6,14 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [http-kit "2.1.5"]
                  [org.clojure/core.match "0.2.0"]
-                 [org.clojure/tools.reader "0.7.7"]
-                 [org.clojure/core.logic "0.8.3"]
+                 ;;[org.clojure/core.logic "0.8.3"]
                  ;; [org.clojure/core.async "0.1.0-SNAPSHOT"]
-                 [org.clojure/core.async "0.1.242.0-44b1e3-alpha"]
+                 [org.clojure/core.async "0.1.256.0-1bf8cf-alpha"]
                  ;; [org.clojure/tools.namespace "0.2.4"]
-                 [org.clojure/clojurescript "0.0-1859"]
-                 ;; [org.clojure/data.json "0.2.2"]
+                 [org.clojure/clojurescript "0.0-2030"]
+                 [com.novemberain/welle "1.5.0"]
                  [instaparse "1.2.2"]
-                 ;; [nu.validator.htmlparser/htmlparser "1.4"]
+                 [org.clojure/data.json "0.2.3"]
                  ]
   
   :profiles {:dev {:dependencies [[midje "1.5.0"]]}}
@@ -29,7 +28,8 @@
                {:source-paths ["clang_code" "resources/apps"]
                 :compiler {:output-to "resources/target/js/clang_dbg.js"
                            :optimizations :whitespace
-                           :pretty-print true}}
+                           :pretty-print true
+                           :source-map "resources/target/js/clang_dbg.js.map"}}
                
                :prod
                {:source-paths ["clang_code" "resources/apps" "resource/shared"]
